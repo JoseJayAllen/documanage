@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - DocuManage</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Overlay for mobile -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+      <div class="profilePic d-none d-md-block mt-5">
+        <a href="{{ url_for('index') }}">
+            <img src="static/img/oqaa.png" alt="">
+        </a>
+    </div>
+    <div class="sidebar-brand">
+      <h4>
+        <i class="fas fa-folder-open"></i>
+        <span>DocuManage</span>
+      </h4>
+    </div>
+
+    <div class="sidebar-menu">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="profile.html" class="nav-link active">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </a>
+        </li>
+        <li class="nav-item admin-only" style="display: none;">
+          <a href="accounts.html" class="nav-link">
+            <i class="fas fa-users"></i>
+            <span>Accounts</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="history.html" class="nav-link">
+            <i class="fas fa-history"></i>
+            <span>Audit Trail</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+      <button class="toggle-sidebar" id="toggleSidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="navbar-right">
+        <div class="search-box d-none d-md-block">
+          <i class="fas fa-search"></i>
+          <input type="text" class="form-control" placeholder="Search...">
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
+
+        <!-- Notifications -->
+        <button class="nav-icon-btn" id="notificationBtn" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="badge-counter" id="notificationBadge" style="display: none;">0</span>
+        </button>
+
+        <!-- Messages -->
+        <button class="nav-icon-btn" id="messageBtn" title="Messages">
+          <i class="fas fa-envelope"></i>
+          <span class="badge-counter" id="messageBadge" style="display: none;">0</span>
+        </button>
+
+        <div class="dropdown">
+          <div class="user-dropdown" data-bs-toggle="dropdown">
+            <img src="https://ui-avatars.com/api/?name=User&background=4e73df&color=fff" alt="User" class="user-avatar">
+            <span class="user-name d-none d-lg-block">Loading...</span>
+            <i class="fas fa-chevron-down d-none d-lg-block" style="font-size: 0.7rem; color: #858796;"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+            <li><a class="dropdown-item" href="#" onclick="showToast('Settings', 'Settings page coming soon!', 'info')"><i class="fas fa-cog me-2"></i>Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Notifications Panel -->
+    <div class="notifications-panel" id="notificationsPanel">
+      <div class="notifications-header">
+        <h6><i class="fas fa-bell me-2"></i>Notifications</h6>
+        <button class="btn btn-sm btn-link" id="markAllNotifRead">Mark all read</button>
+      </div>
+      <div class="notifications-list" id="notificationsList">
+        <div class="p-3 text-center text-muted">No notifications</div>
+      </div>
+    </div>
+
+    <!-- Messages Panel -->
+    <div class="messages-panel" id="messagesPanel">
+      <div class="messages-header">
+        <h6><i class="fas fa-envelope me-2"></i>Messages</h6>
+        <button class="btn btn-sm btn-link" id="markAllMsgRead">Mark all read</button>
+      </div>
+      <div class="messages-list" id="messagesList">
+        <div class="p-3 text-center text-muted">No messages</div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h2>My Profile</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Profile</li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- Profile Header -->
+      <div class="profile-header">
+        <div class="row align-items-center">
+          <div class="col-md-auto text-center text-md-start mb-3 mb-md-0">
+            <img src="https://ui-avatars.com/api/?name=User&background=fff&color=4e73df&size=128" alt="User" class="profile-avatar-large" id="profileAvatarLarge">
+          </div>
+          <div class="col-md text-center text-md-start">
+            <h3 class="profile-name" id="profileName">Loading...</h3>
+            <p class="profile-role mb-0" id="profileDepartment"><i class="fas fa-briefcase me-2"></i>No Department</p>
+            <p class="profile-role mb-0" id="profileEmail"><i class="fas fa-envelope me-2"></i>loading@example.com</p>
+          </div>
+          <div class="col-md-auto text-center text-md-end mt-3 mt-md-0">
+            <button class="btn btn-light" onclick="document.getElementById('avatarInput').click()">
+              <i class="fas fa-camera me-2"></i>Change Photo
+            </button>
+            <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Personal Information -->
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <h6><i class="fas fa-user-edit me-2"></i>Personal Information</h6>
+            </div>
+            <div class="card-body">
+              <form id="profileForm">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">First Name</label>
+                    <input type="text" class="form-control" name="first_name" id="firstName" required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" class="form-control" name="last_name" id="lastName" required>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" readonly>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" name="phone" id="phone" placeholder="Enter phone number">
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">ID Number</label>
+                    <input type="text" class="form-control" id="idNumber" readonly>
+                    <small class="text-muted">ID number cannot be changed</small>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label class="form-label">Department</label>
+                    <select class="form-select" name="department" id="department">
+                      <option value="">Select Department</option>
+                      <option value="Administration">Administration</option>
+                      <option value="Human Resources">Human Resources</option>
+                      <option value="Information Technology">Information Technology</option>
+                      <option value="Finance">Finance</option>
+                      <option value="Operations">Operations</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Address</label>
+                  <textarea class="form-control" name="address" id="address" rows="3" placeholder="Enter your address"></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Bio</label>
+                  <textarea class="form-control" name="bio" id="bio" rows="4" placeholder="Tell us about yourself"></textarea>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Save Changes
+                  </button>
+                  <button type="reset" class="btn btn-outline-secondary">
+                    <i class="fas fa-undo me-2"></i>Reset
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+          <!-- Contact Information -->
+          <div class="profile-info-card mb-4">
+            <h6 class="mb-3"><i class="fas fa-address-card me-2 text-primary"></i>Contact Information</h6>
+
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="info-content">
+                <label>Email</label>
+                <p id="contactEmail">loading@example.com</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-phone"></i>
+              </div>
+              <div class="info-content">
+                <label>Phone</label>
+                <p id="contactPhone">Not provided</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-map-marker-alt"></i>
+              </div>
+              <div class="info-content">
+                <label>Location</label>
+                <p id="contactLocation">Not provided</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-id-card"></i>
+              </div>
+              <div class="info-content">
+                <label>ID Number</label>
+                <p id="contactIdNumber">-</p>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <div class="info-icon">
+                <i class="fas fa-user-tag"></i>
+              </div>
+              <div class="info-content">
+                <label>Role</label>
+                <p id="contactRole">User</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Change Password - Admin Only -->
+          <div class="card admin-only-action" id="passwordSection" style="display: none;">
+            <div class="card-header">
+              <h6><i class="fas fa-lock me-2"></i>Change Password</h6>
+            </div>
+            <div class="card-body">
+              <form id="passwordForm">
+                <div class="mb-3">
+                  <label class="form-label">Current Password</label>
+                  <input type="password" class="form-control" name="current_password" placeholder="Enter current password" required>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">New Password</label>
+                  <input type="password" class="form-control" name="new_password" placeholder="Enter new password" required minlength="6">
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Confirm New Password</label>
+                  <input type="password" class="form-control" name="confirm_password" placeholder="Confirm new password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="fas fa-key me-2"></i>Update Password
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="api.js"></script>
+
+  <script>
+    // Load profile data
+    async function loadProfileData() {
+      try {
+        const user = await ProfileAPI.get();
+
+        // Update profile header
+        document.getElementById('profileName').textContent = user.name;
+        document.getElementById('profileDepartment').innerHTML = `<i class="fas fa-briefcase me-2"></i>${user.department || 'No Department'}`;
+        document.getElementById('profileEmail').innerHTML = `<i class="fas fa-envelope me-2"></i>${user.email}`;
+        document.getElementById('profileAvatarLarge').src = user.avatar;
+
+        // Update form fields
+        document.getElementById('firstName').value = user.first_name || '';
+        document.getElementById('lastName').value = user.last_name || '';
+        document.getElementById('email').value = user.email || '';
+        document.getElementById('phone').value = user.phone || '';
+        document.getElementById('idNumber').value = user.id_number || '';
+        document.getElementById('department').value = user.department || '';
+
+        // Update contact info
+        document.getElementById('contactEmail').textContent = user.email;
+        document.getElementById('contactPhone').textContent = user.phone || 'Not provided';
+        document.getElementById('contactIdNumber').textContent = user.id_number || '-';
+        document.getElementById('contactRole').textContent = user.role?.toUpperCase() || 'User';
+
+        // Show/hide password section based on role
+        if (user.role === 'admin') {
+          document.getElementById('passwordSection').style.display = 'block';
+        }
+
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+        showToast('Error', 'Failed to load profile data', 'danger');
+      }
+    }
+
+    // Handle profile form submission
+    document.getElementById('profileForm')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        const result = await ProfileAPI.update(data);
+        showToast('Success', 'Profile updated successfully', 'success');
+        loadProfileData(); // Refresh data
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to update profile', 'danger');
+      }
+    });
+
+    // Handle password form submission
+    document.getElementById('passwordForm')?.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const data = Object.fromEntries(formData.entries());
+
+      if (data.new_password !== data.confirm_password) {
+        showToast('Error', 'New passwords do not match', 'danger');
+        return;
+      }
+
+      try {
+        await ProfileAPI.changePassword(data);
+        showToast('Success', 'Password changed successfully', 'success');
+        this.reset();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to change password', 'danger');
+      }
+    });
+
+    // Handle avatar upload
+    document.getElementById('avatarInput')?.addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const result = await ProfileAPI.uploadAvatar(formData);
+        document.getElementById('profileAvatarLarge').src = result.avatar;
+        document.querySelectorAll('.user-avatar').forEach(img => {
+          img.src = result.avatar;
+        });
+        showToast('Success', 'Profile photo updated', 'success');
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to upload photo', 'danger');
+      }
+    });
+
+    // Sidebar toggle
+    document.getElementById('toggleSidebar')?.addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('mainContent').classList.toggle('expanded');
+    });
+
+    // Dark mode toggle
+    document.getElementById('darkModeToggle')?.addEventListener('click', function() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+
+      const icon = this.querySelector('i');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
+    });
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      const icon = document.querySelector('#darkModeToggle i');
+      if (icon && savedTheme === 'dark') {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        await loadCurrentUser();
+        await loadProfileData();
+      } catch (error) {
+        console.error('Failed to initialize:', error);
+      }
+    });
+  </script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="script.js"></script>
+  <!-- API Integration -->
+  <script src="api.js"></script>
+</body>
+</html>

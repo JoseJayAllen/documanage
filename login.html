@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - DocuManage</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .pending-alert {
+      background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+      color: white;
+      border: none;
+    }
+    .inactive-alert {
+      background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%);
+      color: white;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card fade-in">
+      <div class="auth-logo">
+        <i class="fas fa-folder-open"></i>
+        <h3>DocuManage</h3>
+        <p>Document Management System</p>
+      </div>
+
+      <!-- Status Messages -->
+      <div id="statusMessage" style="display: none;"></div>
+
+      <form class="auth-form" id="loginForm">
+        <div class="mb-3">
+          <label class="form-label">Email Address</label>
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-end-0">
+              <i class="fas fa-envelope text-muted"></i>
+            </span>
+            <input type="email" class="form-control border-start-0" id="loginEmail" placeholder="Enter your email" required>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <div class="input-group">
+            <span class="input-group-text bg-transparent border-end-0">
+              <i class="fas fa-lock text-muted"></i>
+            </span>
+            <input type="password" class="form-control border-start-0" id="loginPassword" placeholder="Enter your password" required>
+            <button type="button" class="input-group-text bg-transparent border-start-0" onclick="togglePassword('loginPassword')">
+              <i class="fas fa-eye text-muted" id="toggleIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">Remember me</label>
+          </div>
+          <a href="#" class="text-primary text-decoration-none" onclick="showToast('Reset Password', 'Contact your administrator to reset your password.', 'info')">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mb-3" id="loginBtn">
+          <i class="fas fa-sign-in-alt me-2"></i>Sign In
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Don't have an account? <a href="register.html">Register here</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Toggle password visibility
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById('toggleIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // Show toast notification
+    function showToast(title, message, type = 'info') {
+      const toastContainer = document.getElementById('toastContainer');
+      if (!toastContainer) return;
+
+      const toastId = 'toast-' + Date.now();
+      const bgClass = {
+        success: 'bg-success',
+        danger: 'bg-danger',
+        warning: 'bg-warning',
+        info: 'bg-info'
+      }[type] || 'bg-info';
+
+      const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              <strong>${title}</strong><br>
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      `;
+
+      toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+      const toastElement = document.getElementById(toastId);
+      const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+      toast.show();
+
+      toastElement.addEventListener('hidden.bs.toast', function() {
+        toastElement.remove();
+      });
+    }
+
+    // Show status message
+    function showStatusMessage(message, type) {
+      const statusDiv = document.getElementById('statusMessage');
+      const alertClass = type === 'pending' ? 'pending-alert' : type === 'inactive' ? 'inactive-alert' : 'alert-danger';
+      const icon = type === 'pending' ? 'fa-clock' : type === 'inactive' ? 'fa-ban' : 'fa-exclamation-circle';
+
+      statusDiv.innerHTML = `
+        <div class="alert ${alertClass} mb-3">
+          <i class="fas ${icon} me-2"></i>${message}
+        </div>
+      `;
+      statusDiv.style.display = 'block';
+    }
+
+    // Hide status message
+    function hideStatusMessage() {
+      const statusDiv = document.getElementById('statusMessage');
+      statusDiv.style.display = 'none';
+    }
+
+    // Handle login form submission
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      hideStatusMessage();
+
+      const loginBtn = document.getElementById('loginBtn');
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing in...';
+
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showToast('Success', `Welcome, ${data.user.name || data.user.email}!`, 'success');
+          setTimeout(() => {
+            window.location.href = '/index.html';
+          }, 800);
+        } else {
+          // Check for specific status messages
+          if (data.message && data.message.includes('pending approval')) {
+            showStatusMessage(data.message, 'pending');
+          } else if (data.message && data.message.includes('deactivated')) {
+            showStatusMessage(data.message, 'inactive');
+          } else {
+            showToast('Login Failed', data.message || 'Invalid credentials', 'danger');
+          }
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Error', 'Cannot connect to server. Please make sure the server is running.', 'danger');
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+      }
+    });
+
+    // Prevent already-logged-in users from seeing login page
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.ok) {
+          window.location.href = '/index.html';
+        }
+      } catch {}
+    });
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="script.js"></script>
+  <!-- API Integration -->
+  <script src="api.js"></script>
+
+  <!-- Footer -->
+  <footer class="footer mt-5">
+    <div class="container">
+      <div class="row align-items-center text-center text-md-start">
+        <div class="col-md-4 mb-3 mb-md-0">
+          <strong>DocuManage</strong> &copy; 2026
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+          <a href="#">About</a> &nbsp;|&nbsp;
+          <a href="#">Contact</a> &nbsp;|&nbsp;
+          <a href="#">Services</a>
+        </div>
+        <div class="col-md-4 text-md-end brand-icons">
+          <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+          <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
+          <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

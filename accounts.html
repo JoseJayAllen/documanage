@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accounts - DocuManage</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .account-card {
+      transition: all 0.3s ease;
+    }
+    .account-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+    }
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 0.35em 0.65em;
+    }
+    .account-actions {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .account-card:hover .account-actions {
+      opacity: 1;
+    }
+    .stats-card .stats-value {
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay for mobile -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="profilePic d-none d-md-block mt-5">
+        <a href="{{ url_for('index') }}">
+            <img src="static/img/oqaa.png" alt="">
+        </a>
+    </div>
+    <div class="sidebar-brand">
+      <h4>
+        <i class="fas fa-folder-open"></i>
+        <span>DocuManage</span>
+      </h4>
+    </div>
+
+    <div class="sidebar-menu">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a href="home.html" class="nav-link">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="profile.html" class="nav-link">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </a>
+        </li>
+        <li class="nav-item admin-only" style="display: none;">
+          <a href="accounts.html" class="nav-link active">
+            <i class="fas fa-users"></i>
+            <span>Accounts</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="history.html" class="nav-link">
+            <i class="fas fa-history"></i>
+            <span>Audit Trail</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+      <button class="toggle-sidebar" id="toggleSidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="navbar-right">
+        <div class="search-box d-none d-md-block">
+          <i class="fas fa-search"></i>
+          <input type="text" class="form-control" placeholder="Search...">
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
+
+        <!-- Notifications -->
+        <button class="nav-icon-btn" id="notificationBtn" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="badge-counter" id="notificationBadge" style="display: none;">0</span>
+        </button>
+
+        <!-- Messages -->
+        <button class="nav-icon-btn" id="messageBtn" title="Messages">
+          <i class="fas fa-envelope"></i>
+          <span class="badge-counter" id="messageBadge" style="display: none;">0</span>
+        </button>
+
+        <div class="dropdown">
+          <div class="user-dropdown" data-bs-toggle="dropdown">
+            <img src="https://ui-avatars.com/api/?name=User&background=4e73df&color=fff" alt="User" class="user-avatar">
+            <span class="user-name d-none d-lg-block">Loading...</span>
+            <i class="fas fa-chevron-down d-none d-lg-block" style="font-size: 0.7rem; color: #858796;"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+            <li><a class="dropdown-item" href="#" onclick="showToast('Settings', 'Settings page coming soon!', 'info')"><i class="fas fa-cog me-2"></i>Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Notifications Panel -->
+    <div class="notifications-panel" id="notificationsPanel">
+      <div class="notifications-header">
+        <h6><i class="fas fa-bell me-2"></i>Notifications</h6>
+        <button class="btn btn-sm btn-link" id="markAllNotifRead">Mark all read</button>
+      </div>
+      <div class="notifications-list" id="notificationsList">
+        <div class="p-3 text-center text-muted">No notifications</div>
+      </div>
+    </div>
+
+    <!-- Messages Panel -->
+    <div class="messages-panel" id="messagesPanel">
+      <div class="messages-header">
+        <h6><i class="fas fa-envelope me-2"></i>Messages</h6>
+        <button class="btn btn-sm btn-link" id="markAllMsgRead">Mark all read</button>
+      </div>
+      <div class="messages-list" id="messagesList">
+        <div class="p-3 text-center text-muted">No messages</div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h2>Account Management</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Accounts</li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- Note: Statistics moved to Home page for centralized view -->
+      <div class="alert alert-light mb-3 py-2">
+        <small><i class="fas fa-info-circle me-1"></i> Account statistics are now available on the <a href="home.html">Home</a> page.</small>
+      </div>
+
+      <!-- Actions Bar -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" class="form-control" placeholder="Search accounts..." id="searchAccounts">
+              </div>
+            </div>
+            <div class="col-md-6 text-md-end">
+              <div class="btn-group me-2">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  <i class="fas fa-filter me-1"></i>Filter
+                </button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="#" onclick="filterAccounts('all')">All Accounts</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="filterAccounts('active')">Active Only</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="filterAccounts('inactive')">Inactive Only</a></li>
+                  <li><a class="dropdown-item" href="#" onclick="filterAccounts('pending')">Pending Only</a></li>
+                </ul>
+              </div>
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAccountModal">
+                <i class="fas fa-plus me-2"></i>Add New Account
+              </button>
+              <button class="btn btn-outline-secondary" onclick="exportAccounts()">
+                <i class="fas fa-download"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accounts Grid View -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6><i class="fas fa-users me-2"></i>All Accounts</h6>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-primary active" id="gridViewBtn" onclick="toggleAccountsView('grid')">
+              <i class="fas fa-th"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-primary" id="listViewBtn" onclick="toggleAccountsView('list')">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="row" id="accountsGrid">
+            <!-- Accounts will be loaded dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Accounts Table View (Alternative) -->
+      <div class="card mt-4" id="accountsTableCard" style="display: none;">
+        <div class="card-header">
+          <h6><i class="fas fa-table me-2"></i>Account Details</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-container">
+            <table class="table table-hover" id="accountsTable">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                  <th>Last Login</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Accounts will be loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Account Modal -->
+  <div class="modal fade" id="addAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Add New Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="addAccountForm">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">First Name *</label>
+                <input type="text" class="form-control" name="first_name" placeholder="Enter first name" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Last Name *</label>
+                <input type="text" class="form-control" name="last_name" placeholder="Enter last name" required>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Email Address *</label>
+                <input type="email" class="form-control" name="email" placeholder="Enter email address" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" name="phone" placeholder="Enter phone number">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">User Type *</label>
+                <select class="form-select" name="user_type" required>
+                  <option value="">Select User Type</option>
+                  <option value="admin">Administrator</option>
+                  <option value="editor">Editor</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Department</label>
+                <select class="form-select" name="department">
+                  <option value="">Select Department</option>
+                  <option value="Administration">Administration</option>
+                  <option value="Human Resources">Human Resources</option>
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Operations">Operations</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Initial Status</label>
+              <select class="form-select" name="status">
+                <option value="active" selected>Active</option>
+                <option value="pending">Pending</option>
+                <option value="inactive">Inactive</option>
+              </select>
+              <small class="text-muted">Pending accounts require activation before login.</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">ID Number</label>
+              <input type="text" class="form-control" name="id_number" placeholder="Enter ID number (auto-generated if empty)">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password *</label>
+              <input type="password" class="form-control" name="password" placeholder="Set initial password" required minlength="6">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Confirm Password *</label>
+              <input type="password" class="form-control" name="confirm_password" placeholder="Confirm password" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitAddAccount()">
+            <i class="fas fa-plus me-2"></i>Create Account
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Account Modal -->
+  <div class="modal fade" id="editAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Edit Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editAccountForm">
+            <input type="hidden" id="editUserId">
+            <div class="text-center mb-3">
+              <img src="" id="editAvatar" class="rounded-circle" width="80" height="80">
+              <h5 class="mt-2 mb-0" id="editFullName"></h5>
+              <p class="text-muted" id="editEmail"></p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">User Type</label>
+              <select class="form-select" id="editRole">
+                <option value="admin">Administrator</option>
+                <option value="editor">Editor</option>
+                <option value="viewer">Viewer</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Department</label>
+              <select class="form-select" id="editDepartment">
+                <option value="">Select Department</option>
+                <option value="Administration">Administration</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Finance">Finance</option>
+                <option value="Operations">Operations</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Account Status</label>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-success flex-fill" id="btnActivate" onclick="activateAccount()">
+                  <i class="fas fa-check-circle me-1"></i>Activate
+                </button>
+                <button type="button" class="btn btn-outline-warning flex-fill" id="btnPending" onclick="setPendingStatus()">
+                  <i class="fas fa-clock me-1"></i>Pending
+                </button>
+                <button type="button" class="btn btn-outline-danger flex-fill" id="btnDeactivate" onclick="deactivateAccount()">
+                  <i class="fas fa-ban me-1"></i>Deactivate
+                </button>
+              </div>
+              <input type="hidden" id="editStatus" value="active">
+            </div>
+            <div class="alert alert-info" id="statusInfo">
+              <i class="fas fa-info-circle me-2"></i>Current status: <strong id="currentStatus">Active</strong>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitEditAccount()">
+            <i class="fas fa-save me-2"></i>Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="api.js"></script>
+
+  <script>
+    let accountsData = [];
+    let filteredAccounts = [];
+    let currentEditUser = null;
+
+    // Check admin access
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        const user = await loadCurrentUser();
+        if (user.role !== 'admin') {
+          showToast('Access Denied', 'You do not have permission to view this page', 'danger');
+          setTimeout(() => {
+            window.location.href = 'index.html';
+          }, 1500);
+          return;
+        }
+        await loadAccounts();
+      } catch (error) {
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Load accounts
+    async function loadAccounts() {
+      try {
+        // Load accounts
+        accountsData = await AccountsAPI.getAll();
+        filteredAccounts = [...accountsData];
+        renderAccountsGrid();
+        renderAccountsTable();
+
+        // Load stats
+        const stats = await AccountsAPI.getStats();
+        updateStats(stats);
+      } catch (error) {
+        console.error('Failed to load accounts:', error);
+        showToast('Error', 'Failed to load accounts', 'danger');
+      }
+    }
+
+    // Update statistics cards
+    function updateStats(stats) {
+      document.getElementById('statTotal').textContent = stats.total_accounts;
+      document.getElementById('statActive').textContent = stats.active_users;
+      document.getElementById('statInactive').textContent = stats.inactive_users;
+      document.getElementById('statPending').textContent = stats.pending_accounts;
+    }
+
+    // Filter accounts
+    function filterAccounts(status) {
+      if (status === 'all') {
+        filteredAccounts = [...accountsData];
+      } else {
+        filteredAccounts = accountsData.filter(a => a.status === status);
+      }
+      renderAccountsGrid();
+      renderAccountsTable();
+      showToast('Info', `Showing ${filteredAccounts.length} ${status} account(s)`, 'info');
+    }
+
+    // Render accounts grid
+    function renderAccountsGrid() {
+      const grid = document.getElementById('accountsGrid');
+
+      if (filteredAccounts.length === 0) {
+        grid.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <p class="text-muted">No accounts found</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filteredAccounts.map(account => {
+        const statusColors = {
+          active: 'success',
+          inactive: 'danger',
+          pending: 'warning'
+        };
+        const statusBadge = `<span class="badge bg-${statusColors[account.status] || 'secondary'} status-badge">${account.status}</span>`;
+
+        return `
+          <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+            <div class="account-card card h-100">
+              <div class="card-body text-center">
+                <img src="${account.avatar}" alt="${account.name}" class="rounded-circle mb-3" width="80" height="80">
+                <h5 class="account-name mb-1">${account.name}</h5>
+                <p class="account-email text-muted mb-2">${account.email}</p>
+                <span class="badge bg-${account.role === 'admin' ? 'primary' : account.role === 'editor' ? 'success' : 'info'} mb-2">${account.role}</span>
+                <div class="mb-2">${statusBadge}</div>
+                <p class="text-muted small mb-0">${account.department || 'No Department'}</p>
+                <div class="account-actions mt-3">
+                  <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(${account.id})">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  ${account.status === 'pending' ? `
+                    <button class="btn btn-sm btn-success me-1" onclick="quickActivate(${account.id})">
+                      <i class="fas fa-check"></i> Activate
+                    </button>
+                  ` : account.status === 'active' ? `
+                    <button class="btn btn-sm btn-warning me-1" onclick="quickDeactivate(${account.id})">
+                      <i class="fas fa-ban"></i> Deactivate
+                    </button>
+                  ` : `
+                    <button class="btn btn-sm btn-success me-1" onclick="quickActivate(${account.id})">
+                      <i class="fas fa-check"></i> Activate
+                    </button>
+                  `}
+                  <button class="btn btn-sm btn-outline-danger" onclick="deleteAccount(${account.id})" ${account.id === currentUser?.id ? 'disabled' : ''}>
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Render accounts table
+    function renderAccountsTable() {
+      const tbody = document.querySelector('#accountsTable tbody');
+
+      if (filteredAccounts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">No accounts found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filteredAccounts.map(account => {
+        const statusColors = {
+          active: 'success',
+          inactive: 'danger',
+          pending: 'warning'
+        };
+
+        return `
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <img src="${account.avatar}" alt="${account.name}" class="rounded-circle me-2" width="40" height="40">
+                <div>
+                  <div class="fw-bold">${account.name}</div>
+                  <small class="text-muted">${account.email}</small>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge bg-${account.role === 'admin' ? 'primary' : account.role === 'editor' ? 'success' : 'info'}">${account.role}</span></td>
+            <td>${account.department || '-'}</td>
+            <td><span class="badge bg-${statusColors[account.status] || 'secondary'}">${account.status}</span></td>
+            <td>${account.last_login || 'Never'}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(${account.id})">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteAccount(${account.id})" ${account.id === currentUser?.id ? 'disabled' : ''}>
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Toggle between grid and list view
+    function toggleAccountsView(view) {
+  const gridRow = document.getElementById('accountsGrid');     // the <div class="row">
+  const tableCard = document.getElementById('accountsTableCard');
+  const gridBtn = document.getElementById('gridViewBtn');
+  const listBtn = document.getElementById('listViewBtn');
+
+  if (view === 'grid') {
+    gridRow.style.display = 'flex';
+    tableCard.style.display = 'none';
+    gridBtn.classList.add('active');
+    listBtn.classList.remove('active');
+  } else {
+    gridRow.style.display = 'none';
+    tableCard.style.display = 'block';
+    gridBtn.classList.remove('active');
+    listBtn.classList.add('active');
+  }
+}
+
+    // Open edit modal
+    function openEditModal(userId) {
+      currentEditUser = accountsData.find(a => a.id === userId);
+      if (!currentEditUser) return;
+
+      document.getElementById('editUserId').value = currentEditUser.id;
+      document.getElementById('editAvatar').src = currentEditUser.avatar;
+      document.getElementById('editFullName').textContent = currentEditUser.name;
+      document.getElementById('editEmail').textContent = currentEditUser.email;
+      document.getElementById('editRole').value = currentEditUser.role;
+      document.getElementById('editDepartment').value = currentEditUser.department || '';
+      document.getElementById('editStatus').value = currentEditUser.status;
+      document.getElementById('currentStatus').textContent = currentEditUser.status.charAt(0).toUpperCase() + currentEditUser.status.slice(1);
+
+      // Update status buttons
+      updateStatusButtons(currentEditUser.status);
+
+      const modal = new bootstrap.Modal(document.getElementById('editAccountModal'));
+      modal.show();
+    }
+
+    // Update status button states
+    function updateStatusButtons(status) {
+      const btnActivate = document.getElementById('btnActivate');
+      const btnPending = document.getElementById('btnPending');
+      const btnDeactivate = document.getElementById('btnDeactivate');
+      const statusInput = document.getElementById('editStatus');
+      const statusInfo = document.getElementById('statusInfo');
+
+      // Reset all buttons
+      btnActivate.classList.remove('btn-success', 'active');
+      btnActivate.classList.add('btn-outline-success');
+      btnPending.classList.remove('btn-warning', 'active');
+      btnPending.classList.add('btn-outline-warning');
+      btnDeactivate.classList.remove('btn-danger', 'active');
+      btnDeactivate.classList.add('btn-outline-danger');
+
+      // Highlight current status
+      if (status === 'active') {
+        btnActivate.classList.remove('btn-outline-success');
+        btnActivate.classList.add('btn-success', 'active');
+      } else if (status === 'pending') {
+        btnPending.classList.remove('btn-outline-warning');
+        btnPending.classList.add('btn-warning', 'active');
+      } else if (status === 'inactive') {
+        btnDeactivate.classList.remove('btn-outline-danger');
+        btnDeactivate.classList.add('btn-danger', 'active');
+      }
+
+      statusInput.value = status;
+      statusInfo.innerHTML = `<i class="fas fa-info-circle me-2"></i>Current status: <strong>${status.charAt(0).toUpperCase() + status.slice(1)}</strong>`;
+      statusInfo.className = `alert alert-${status === 'active' ? 'success' : status === 'pending' ? 'warning' : 'danger'}`;
+    }
+
+    // Status change handlers
+    function activateAccount() {
+      updateStatusButtons('active');
+    }
+
+    function setPendingStatus() {
+      updateStatusButtons('pending');
+    }
+
+    function deactivateAccount() {
+      if (currentEditUser && currentEditUser.id === currentUser?.id) {
+        showToast('Error', 'You cannot deactivate your own account', 'danger');
+        return;
+      }
+      updateStatusButtons('inactive');
+    }
+
+    // Quick activate from grid
+    async function quickActivate(userId) {
+      try {
+        await apiCall(`/accounts/${userId}/activate`, 'POST');
+        showToast('Success', 'Account activated successfully', 'success');
+        loadAccounts();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to activate account', 'danger');
+      }
+    }
+
+    // Quick deactivate from grid
+    async function quickDeactivate(userId) {
+      if (userId === currentUser?.id) {
+        showToast('Error', 'You cannot deactivate your own account', 'danger');
+        return;
+      }
+      try {
+        await apiCall(`/accounts/${userId}/deactivate`, 'POST');
+        showToast('Success', 'Account deactivated successfully', 'success');
+        loadAccounts();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to deactivate account', 'danger');
+      }
+    }
+
+    // Submit add account form
+    async function submitAddAccount() {
+      const form = document.getElementById('addAccountForm');
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      // Validate passwords match
+      if (data.password !== data.confirm_password) {
+        showToast('Error', 'Passwords do not match', 'danger');
+        return;
+      }
+
+      try {
+        await AccountsAPI.create(data);
+        showToast('Success', 'Account created successfully', 'success');
+
+        // Close modal and refresh
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addAccountModal'));
+        modal.hide();
+        form.reset();
+        loadAccounts();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to create account', 'danger');
+      }
+    }
+
+    // Submit edit account form
+    async function submitEditAccount() {
+      const userId = document.getElementById('editUserId').value;
+      const data = {
+        role: document.getElementById('editRole').value,
+        department: document.getElementById('editDepartment').value,
+        status: document.getElementById('editStatus').value
+      };
+
+      try {
+        await AccountsAPI.update(userId, data);
+        showToast('Success', 'Account updated successfully', 'success');
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editAccountModal'));
+        modal.hide();
+        loadAccounts();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to update account', 'danger');
+      }
+    }
+
+    // Delete account
+    async function deleteAccount(userId) {
+      if (userId === currentUser?.id) {
+        showToast('Error', 'Cannot delete your own account', 'danger');
+        return;
+      }
+
+      const account = accountsData.find(a => a.id === userId);
+      if (!account) return;
+
+      if (!confirm(`Are you sure you want to delete ${account.name}'s account? This action cannot be undone.`)) return;
+
+      try {
+        await AccountsAPI.delete(userId);
+        showToast('Success', 'Account deleted successfully', 'success');
+        loadAccounts();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to delete account', 'danger');
+      }
+    }
+
+    // Search accounts
+    document.getElementById('searchAccounts')?.addEventListener('input', function() {
+      const query = this.value.toLowerCase();
+      filteredAccounts = accountsData.filter(account => {
+        const name = account.name?.toLowerCase() || '';
+        const email = account.email?.toLowerCase() || '';
+        const department = account.department?.toLowerCase() || '';
+        return name.includes(query) || email.includes(query) || department.includes(query);
+      });
+      renderAccountsGrid();
+      renderAccountsTable();
+    });
+
+    // Export accounts
+    function exportAccounts() {
+      if (accountsData.length === 0) {
+        showToast('Error', 'No data to export', 'danger');
+        return;
+      }
+
+      let csv = 'Name,Email,Role,Department,Status,Last Login\n';
+      accountsData.forEach(account => {
+        csv += `"${account.name}","${account.email}","${account.role}","${account.department || '-'}","${account.status}","${account.last_login || 'Never'}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `accounts-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      showToast('Success', 'Accounts exported successfully', 'success');
+    }
+
+    // Sidebar toggle
+    document.getElementById('toggleSidebar')?.addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('mainContent').classList.toggle('expanded');
+    });
+
+    // Dark mode toggle
+    document.getElementById('darkModeToggle')?.addEventListener('click', function() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+
+      const icon = this.querySelector('i');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
+    });
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      const icon = document.querySelector('#darkModeToggle i');
+      if (icon && savedTheme === 'dark') {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      }
+    }
+  </script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="script.js"></script>
+  <!-- API Integration -->
+  <script src="api.js"></script>
+</body>
+</html>

@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Trail - DocuManage</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .filter-badge {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      margin-left: 0.5rem;
+    }
+    .activity-bar {
+      height: 8px;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+    .login-item {
+      transition: background-color 0.2s ease;
+    }
+    .login-item:hover {
+      background-color: var(--bg-color);
+    }
+  </style>
+</head>
+<body>
+  <!-- Overlay for mobile -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+      <div class="profilePic d-none d-md-block mt-5">
+        <a href="{{ url_for('index') }}">
+            <img src="static/img/oqaa.png" alt="">
+        </a>
+    </div>
+    <div class="sidebar-brand">
+      <h4>
+        <i class="fas fa-folder-open"></i>
+        <span>DocuManage</span>
+      </h4>
+    </div>
+
+    <div class="sidebar-menu">
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a href="home.html" class="nav-link">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="profile.html" class="nav-link">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+          </a>
+        </li>
+        <li class="nav-item admin-only" style="display: none;">
+          <a href="accounts.html" class="nav-link">
+            <i class="fas fa-users"></i>
+            <span>Accounts</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="history.html" class="nav-link active">
+            <i class="fas fa-history"></i>
+            <span>Audit Trail</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Logout</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+      <button class="toggle-sidebar" id="toggleSidebar">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <div class="navbar-right">
+        <div class="search-box d-none d-md-block">
+          <i class="fas fa-search"></i>
+          <input type="text" class="form-control" placeholder="Search...">
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode">
+          <i class="fas fa-moon"></i>
+        </button>
+
+        <!-- Notifications -->
+        <button class="nav-icon-btn" id="notificationBtn" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="badge-counter" id="notificationBadge" style="display: none;">0</span>
+        </button>
+
+        <!-- Messages -->
+        <button class="nav-icon-btn" id="messageBtn" title="Messages">
+          <i class="fas fa-envelope"></i>
+          <span class="badge-counter" id="messageBadge" style="display: none;">0</span>
+        </button>
+
+        <div class="dropdown">
+          <div class="user-dropdown" data-bs-toggle="dropdown">
+            <img src="https://ui-avatars.com/api/?name=User&background=4e73df&color=fff" alt="User" class="user-avatar">
+            <span class="user-name d-none d-lg-block">Loading...</span>
+            <i class="fas fa-chevron-down d-none d-lg-block" style="font-size: 0.7rem; color: #858796;"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+            <li><a class="dropdown-item" href="#" onclick="showToast('Settings', 'Settings page coming soon!', 'info')"><i class="fas fa-cog me-2"></i>Settings</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Notifications Panel -->
+    <div class="notifications-panel" id="notificationsPanel">
+      <div class="notifications-header">
+        <h6><i class="fas fa-bell me-2"></i>Notifications</h6>
+        <button class="btn btn-sm btn-link" id="markAllNotifRead">Mark all read</button>
+      </div>
+      <div class="notifications-list" id="notificationsList">
+        <div class="p-3 text-center text-muted">No notifications</div>
+      </div>
+    </div>
+
+    <!-- Messages Panel -->
+    <div class="messages-panel" id="messagesPanel">
+      <div class="messages-header">
+        <h6><i class="fas fa-envelope me-2"></i>Messages</h6>
+        <button class="btn btn-sm btn-link" id="markAllMsgRead">Mark all read</button>
+      </div>
+      <div class="messages-list" id="messagesList">
+        <div class="p-3 text-center text-muted">No messages</div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h2>Audit Trail</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Audit Trail</li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- Note: Key statistics moved to Home page -->
+      <div class="alert alert-light mb-3 py-2 small">
+        <i class="fas fa-info-circle me-1"></i> Overall activity stats are centralized on the <a href="home.html">Home</a> page. Use filters below for detailed audit reports.
+      </div>
+
+      <!-- Filters -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h6><i class="fas fa-filter me-2"></i>Filter Activities</h6>
+        </div>
+        <div class="card-body">
+          <div class="row align-items-end">
+            <div class="col-md-2 mb-3 mb-md-0">
+              <label class="form-label">Date Range</label>
+              <select class="form-select" id="filterDateRange">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="week" selected>This Week</option>
+                <option value="month">This Month</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+            <div class="col-md-3 mb-3 mb-md-0">
+              <label class="form-label">Custom Date Range (Calendar)</label>
+              <div class="input-group input-group-sm">
+                <input type="date" class="form-control" id="startDate" placeholder="Start">
+                <input type="date" class="form-control" id="endDate" placeholder="End">
+              </div>
+              <small class="text-muted">Overrides date range select if set</small>
+            </div>
+            <div class="col-md-2 mb-3 mb-md-0">
+              <label class="form-label">Activity Type</label>
+              <select class="form-select" id="filterActivityType">
+                <option value="all" selected>All Activities</option>
+                <option value="upload">File Uploads</option>
+                <option value="download">File Downloads</option>
+                <option value="delete">File Deletions</option>
+                <option value="login">Logins</option>
+                <option value="logout">Logouts</option>
+                <option value="register">Registrations</option>
+                <option value="activate">Account Activations</option>
+                <option value="deactivate">Account Deactivations</option>
+              </select>
+            </div>
+            <div class="col-md-2 mb-3 mb-md-0">
+              <label class="form-label">User</label>
+              <select class="form-select" id="filterUser">
+                <option value="all" selected>All Users</option>
+              </select>
+            </div>
+            <div class="col-md-3 text-md-end">
+              <button class="btn btn-primary btn-sm" onclick="applyFilters()">
+                <i class="fas fa-filter me-1"></i>Apply
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="clearFilters()">
+                <i class="fas fa-times"></i>
+              </button>
+              <button class="btn btn-outline-success btn-sm" onclick="exportAuditTrail()">
+                <i class="fas fa-download"></i>
+              </button>
+              <button class="btn btn-info btn-sm text-white" onclick="printReport()">
+                <i class="fas fa-print me-1"></i>Print Report
+              </button>
+            </div>
+          </div>
+          <div class="mt-3" id="activeFilters" style="display: none;">
+            <small class="text-muted">Active filters:</small>
+            <span id="filterTags"></span>
+          </div>
+        </div>
+      </div>
+
+<div class="row">
+        <!-- Timeline - now full width -->
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h6><i class="fas fa-stream me-2"></i>Activity Timeline</h6>
+              <span class="badge bg-primary" id="timelineBadge">Last 7 Days</span>
+            </div>
+            <div class="card-body">
+              <div class="timeline" id="auditTimeline">
+                <!-- loaded by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Logins - fixed & improved -->
+        <div class="col-12 mt-4">
+          <div class="card">
+            <div class="card-header">
+              <h6><i class="fas fa-sign-in-alt me-2"></i>Recent Login Activity</h6>
+            </div>
+            <div class="card-body" id="recentLogins">
+              <p class="text-muted text-center">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Activity Table -->
+      <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6><i class="fas fa-table me-2"></i>Detailed Activity Log</h6>
+          <span class="badge bg-secondary" id="totalRecords">0 records</span>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover" id="auditTable">
+              <thead>
+                <tr>
+                  <th>Date & Time</th>
+                  <th>User</th>
+                  <th>Activity</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Activities will be loaded dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <nav aria-label="Page navigation" class="mt-3">
+            <ul class="pagination justify-content-center" id="pagination">
+              <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1">Previous</a>
+              </li>
+              <li class="page-item active"><a class="page-link" href="#">1</a></li>
+              <li class="page-item disabled">
+                <a class="page-link" href="#">Next</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="api.js"></script>
+
+  <script>
+    let auditData = [];
+    let usersData = [];
+    let currentFilters = { date_range: 'week', activity_type: 'all', user: 'all' };
+
+    // Load audit trail data
+    async function loadAuditData(filters = {}) {
+      try {
+        // Load stats
+        const stats = await AuditAPI.getStats();
+        document.getElementById('totalActivities').textContent = stats.total_activities.toLocaleString();
+        document.getElementById('fileUploads').textContent = stats.uploads.toLocaleString();
+        document.getElementById('fileDownloads').textContent = stats.downloads.toLocaleString();
+        document.getElementById('todayLogins').textContent = stats.today_logins;
+
+        // Update activity summary
+        updateActivitySummary(stats.action_breakdown);
+
+        // Load audit trail with filters
+        auditData = await AuditAPI.getAll(filters);
+        renderTimeline();
+        renderAuditTable();
+        document.getElementById('totalRecords').textContent = auditData.length + ' records';
+
+      } catch (error) {
+        console.error('Failed to load audit data:', error);
+        showToast('Error', 'Failed to load audit trail', 'danger');
+      }
+    }
+
+    // Load recent logins
+    async function loadRecentLogins() {
+      try {
+        const logins = await apiCall('/audit-trail/recent-logins');
+        renderRecentLogins(logins);
+      } catch (error) {
+        console.error('Failed to load recent logins:', error);
+        document.getElementById('recentLogins').innerHTML = '<p class="text-muted text-center">Unable to load login activity</p>';
+      }
+    }
+
+    // Load users for filter
+    async function loadUsersForFilter() {
+      try {
+        usersData = await AccountsAPI.getAll();
+        const select = document.getElementById('filterUser');
+        // Clear existing options except "All Users"
+        while (select.options.length > 1) {
+          select.remove(1);
+        }
+        usersData.forEach(user => {
+          const option = document.createElement('option');
+          option.value = user.id;
+          option.textContent = user.name;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Failed to load users:', error);
+      }
+    }
+
+    // Update activity summary with progress bars
+    function updateActivitySummary(actionBreakdown) {
+      const container = document.getElementById('activitySummary');
+
+      if (!actionBreakdown || Object.keys(actionBreakdown).length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No activity data available</p>';
+        return;
+      }
+
+      const total = Object.values(actionBreakdown).reduce((a, b) => a + b, 0);
+      const colors = {
+        'UPLOAD': 'success',
+        'DOWNLOAD': 'warning',
+        'DELETE': 'danger',
+        'LOGIN': 'info',
+        'LOGOUT': 'secondary',
+        'REGISTER': 'primary',
+        'UPDATE': 'info',
+        'CREATE_ACCOUNT': 'success',
+        'ACTIVATE_ACCOUNT': 'success',
+        'DEACTIVATE_ACCOUNT': 'danger'
+      };
+
+      const labels = {
+        'UPLOAD': 'File Uploads',
+        'DOWNLOAD': 'File Downloads',
+        'DELETE': 'File Deletions',
+        'LOGIN': 'Logins',
+        'LOGOUT': 'Logouts',
+        'REGISTER': 'Registrations',
+        'UPDATE': 'Profile Updates',
+        'CREATE_ACCOUNT': 'Account Creations',
+        'ACTIVATE_ACCOUNT': 'Account Activations',
+        'DEACTIVATE_ACCOUNT': 'Account Deactivations'
+      };
+
+      // Sort by count descending
+      const sorted = Object.entries(actionBreakdown).sort((a, b) => b[1] - a[1]);
+
+      let html = '';
+      sorted.forEach(([action, count]) => {
+        const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+        const color = colors[action] || 'primary';
+        const label = labels[action] || action;
+
+        html += `
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span>${label}</span>
+              <span class="text-${color} fw-bold">${count} (${percentage}%)</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar bg-${color} activity-bar" style="width: ${percentage}%"></div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Render recent logins
+    function renderRecentLogins(logins) {
+      const container = document.getElementById('recentLogins');
+      document.getElementById('loginCount').textContent = logins.length;
+
+      if (logins.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No recent login activity</p>';
+        return;
+      }
+
+      container.innerHTML = logins.map(login => `
+        <div class="login-item d-flex align-items-center p-2 rounded">
+          <img src="${login.avatar}" alt="${login.user}" class="rounded-circle me-3" width="40" height="40">
+          <div class="flex-grow-1">
+            <div class="fw-bold">${login.user}</div>
+            <small class="text-muted">${login.action === 'LOGIN' ? 'Logged in' : 'Logged out'} • ${login.time_relative}</small>
+          </div>
+          <span class="badge bg-${login.action === 'LOGIN' ? 'success' : 'secondary'}">${login.action}</span>
+        </div>
+      `).join('');
+    }
+
+    // Render timeline
+    function renderTimeline() {
+      const timeline = document.getElementById('auditTimeline');
+
+      if (auditData.length === 0) {
+        timeline.innerHTML = '<p class="text-muted text-center py-4">No activities found for the selected filters</p>';
+        return;
+      }
+
+      timeline.innerHTML = auditData.slice(0, 30).map(item => `
+        <div class="timeline-item">
+          <div class="timeline-marker ${item.type}"></div>
+          <div class="timeline-content">
+            <div class="timeline-title">${item.action}</div>
+            <div class="timeline-text">${item.description}</div>
+            <div class="timeline-time">
+              <i class="fas fa-user me-1"></i>${item.user}
+              <i class="fas fa-clock ms-2 me-1"></i>${item.time}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Render audit table
+    function renderAuditTable() {
+      const tbody = document.querySelector('#auditTable tbody');
+
+      if (auditData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">No activities found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = auditData.map(item => `
+        <tr>
+          <td>${item.time}</td>
+          <td>
+            <div class="d-flex align-items-center">
+              <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(item.user)}&background=4e73df&color=fff"
+                   alt="${item.user}" class="rounded-circle me-2" width="30" height="30">
+              <span>${item.user}</span>
+            </div>
+          </td>
+          <td><span class="badge bg-${item.type === 'success' ? 'success' : item.type === 'danger' ? 'danger' : item.type === 'warning' ? 'warning' : 'info'}">${item.action}</span></td>
+          <td>${item.description}</td>
+          <td><span class="badge bg-success">Success</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // Apply filters (supports custom calendar date range)
+    function applyFilters() {
+      const dateRange = document.getElementById('filterDateRange').value;
+      const activityType = document.getElementById('filterActivityType').value;
+      const user = document.getElementById('filterUser').value;
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      currentFilters = { date_range: dateRange, activity_type: activityType, user: user };
+
+      // Add custom dates if provided (backend supports start_date/end_date)
+      if (startDate) currentFilters.start_date = startDate;
+      if (endDate) currentFilters.end_date = endDate;
+
+      // Update filter tags display
+      updateFilterTags();
+
+      // Update badge
+      let badgeText = 'Filtered';
+      if (startDate || endDate) {
+        badgeText = `${startDate || 'Start'} to ${endDate || 'End'}`;
+      } else {
+        const badgeLabels = {
+          'all': 'All Time', 'today': 'Today', 'week': 'Last 7 Days',
+          'month': 'This Month', 'year': 'This Year'
+        };
+        badgeText = badgeLabels[dateRange] || 'Filtered';
+      }
+      document.getElementById('timelineBadge').textContent = badgeText;
+
+      // Load data with filters (api supports start_date/end_date)
+      loadAuditData(currentFilters);
+      showToast('Success', 'Filters applied' + (startDate || endDate ? ' (custom range)' : ''), 'success');
+    }
+
+    // Update filter tags display
+    function updateFilterTags() {
+      const container = document.getElementById('activeFilters');
+      const tagsContainer = document.getElementById('filterTags');
+
+      const tags = [];
+
+      if (currentFilters.date_range !== 'all') {
+        const labels = { 'today': 'Today', 'week': 'This Week', 'month': 'This Month', 'year': 'This Year' };
+        tags.push(`<span class="badge bg-primary filter-badge">Date: ${labels[currentFilters.date_range]}</span>`);
+      }
+
+      if (currentFilters.activity_type !== 'all') {
+        const labels = {
+          'upload': 'Uploads', 'download': 'Downloads', 'delete': 'Deletions',
+          'login': 'Logins', 'logout': 'Logouts', 'register': 'Registrations',
+          'activate': 'Activations', 'deactivate': 'Deactivations'
+        };
+        tags.push(`<span class="badge bg-info filter-badge">Type: ${labels[currentFilters.activity_type]}</span>`);
+      }
+
+      if (currentFilters.user !== 'all') {
+        const user = usersData.find(u => u.id == currentFilters.user);
+        if (user) {
+          tags.push(`<span class="badge bg-success filter-badge">User: ${user.name}</span>`);
+        }
+      }
+
+      if (tags.length > 0) {
+        tagsContainer.innerHTML = tags.join('');
+        container.style.display = 'block';
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    // Clear filters
+    function clearFilters() {
+      document.getElementById('filterDateRange').value = 'all';
+      document.getElementById('filterActivityType').value = 'all';
+      document.getElementById('filterUser').value = 'all';
+      document.getElementById('startDate').value = '';
+      document.getElementById('endDate').value = '';
+      currentFilters = { date_range: 'all', activity_type: 'all', user: 'all' };
+      document.getElementById('activeFilters').style.display = 'none';
+      document.getElementById('timelineBadge').textContent = 'All Time';
+      loadAuditData(currentFilters);
+      showToast('Success', 'Filters cleared', 'info');
+    }
+
+    // Export audit trail
+    function exportAuditTrail() {
+      // Create CSV content
+      if (auditData.length === 0) {
+        showToast('Error', 'No data to export', 'danger');
+        return;
+      }
+
+      let csv = 'Date & Time,User,Activity,Description\n';
+      auditData.forEach(item => {
+        csv += `"${item.time}","${item.user}","${item.action}","${item.description}"\n`;
+      });
+
+      // Download CSV
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `audit-trail-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      showToast('Success', 'Audit trail exported successfully', 'success');
+    }
+
+    // Print Report - generates a nice printable view of current filtered audit data + calendar range
+    function printReport() {
+      if (auditData.length === 0) {
+        showToast('Error', 'No data to print. Apply filters first.', 'danger');
+        return;
+      }
+
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const dateRange = document.getElementById('filterDateRange').value;
+      const activityType = document.getElementById('filterActivityType').value;
+
+      let periodText = 'All Time';
+      if (startDate || endDate) {
+        periodText = `${startDate || '...'} to ${endDate || '...'}`;
+      } else {
+        const labels = { 'today': 'Today', 'week': 'This Week', 'month': 'This Month', 'year': 'This Year', 'all': 'All Time' };
+        periodText = labels[dateRange] || dateRange;
+      }
+
+      // Create printable HTML
+      let printHtml = `
+        <div style="font-family: 'Nunito', sans-serif; padding: 20px; max-width: 1000px; margin: auto;">
+          <div style="text-align: center; border-bottom: 3px solid #4e73df; padding-bottom: 15px; margin-bottom: 20px;">
+            <h1 style="color: #4e73df; margin: 0;">DocuManage</h1>
+            <h2 style="margin: 5px 0;">Audit Trail Report</h2>
+            <p style="color: #666; margin: 0;">Generated on ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+          </div>
+
+          <div style="margin-bottom: 20px; background: #f8f9fc; padding: 15px; border-radius: 8px;">
+            <h4 style="margin-top:0;">Report Period: <span style="color:#4e73df;">${periodText}</span></h4>
+            <p style="margin:5px 0;"><strong>Activity Type:</strong> ${activityType === 'all' ? 'All Activities' : activityType}</p>
+            <p style="margin:5px 0;"><strong>Total Records:</strong> ${auditData.length}</p>
+          </div>
+
+          <table style="width:100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr style="background: #4e73df; color: white;">
+                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Date & Time</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">User</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Activity</th>
+                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      auditData.forEach(item => {
+        printHtml += `
+          <tr>
+            <td style="padding: 8px; border: 1px solid #ddd;">${item.time}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${item.user}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;"><span style="background:#e3e6f0; padding:2px 8px; border-radius:10px; font-size:11px;">${item.action}</span></td>
+            <td style="padding: 8px; border: 1px solid #ddd;">${item.description}</td>
+          </tr>
+        `;
+      });
+
+      printHtml += `
+            </tbody>
+          </table>
+
+          <div style="margin-top: 30px; font-size: 11px; color: #858796; text-align: center; border-top: 1px solid #eee; padding-top: 15px;">
+            This is an official audit report from DocuManage Document Management System.<br>
+            Confidential - For authorized personnel only.
+          </div>
+        </div>
+      `;
+
+      // Open print window
+      const printWindow = window.open('', '_blank', 'width=1000,height=800');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Audit Report - ${periodText}</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+          </head>
+          <body style="background:white; padding:20px;">
+            ${printHtml}
+            <script>
+              window.onload = function() {
+                window.print();
+                // Optional: close after print dialog
+                setTimeout(() => window.close(), 500);
+              }
+            <\/script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+
+      showToast('Report Ready', 'Print dialog opened. You can also save as PDF from print options.', 'success');
+    }
+
+    // Sidebar toggle
+    document.getElementById('toggleSidebar')?.addEventListener('click', function() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('mainContent').classList.toggle('expanded');
+    });
+
+    // Dark mode toggle (uses safeStorage if available, with fallback)
+    document.getElementById('darkModeToggle')?.addEventListener('click', function() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      try { localStorage.setItem('theme', newTheme); } catch(e){}
+
+      const icon = this.querySelector('i');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
+    });
+
+    // Load saved theme (safe)
+    let savedTheme = null;
+    try { savedTheme = localStorage.getItem('theme'); } catch(e){}
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      const icon = document.querySelector('#darkModeToggle i');
+      if (icon && savedTheme === 'dark') {
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        await loadCurrentUser();
+        await loadUsersForFilter();
+        await loadAuditData(currentFilters);
+        await loadRecentLogins();
+      } catch (error) {
+        console.error('Failed to initialize:', error);
+      }
+    });
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="script.js"></script>
+  <!-- API Integration -->
+  <script src="api.js"></script>
+</body>
+</html>

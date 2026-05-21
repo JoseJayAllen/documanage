@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - DocuManage</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .pending-notice {
+      background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
+      color: white;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .pending-notice i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <div class="auth-card fade-in">
+      <!-- Registration Form -->
+      <div id="registrationForm">
+        <div class="auth-logo">
+          <i class="fas fa-folder-open"></i>
+          <h3>DocuManage</h3>
+          <p>Create your account</p>
+        </div>
+
+        <form class="auth-form" id="registerForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">First Name</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0">
+                  <i class="fas fa-user text-muted"></i>
+                </span>
+                <input type="text" class="form-control border-start-0" name="first_name" id="firstName" placeholder="First name" required>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Last Name</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0">
+                  <i class="fas fa-user text-muted"></i>
+                </span>
+                <input type="text" class="form-control border-start-0" name="last_name" id="lastName" placeholder="Last name" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0">
+                <i class="fas fa-envelope text-muted"></i>
+              </span>
+              <input type="email" class="form-control border-start-0" name="email" id="registerEmail" placeholder="Enter your email" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Department</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0">
+                <i class="fas fa-building text-muted"></i>
+              </span>
+              <select class="form-select border-start-0" name="department" id="department">
+                <option value="">Select Department (Optional)</option>
+                <option value="Administration">Administration</option>
+                <option value="Human Resources">Human Resources</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Finance">Finance</option>
+                <option value="Operations">Operations</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0">
+                <i class="fas fa-lock text-muted"></i>
+              </span>
+              <input type="password" class="form-control border-start-0" name="password" id="registerPassword" placeholder="Create password" required minlength="6">
+              <button type="button" class="input-group-text bg-transparent border-start-0" onclick="togglePassword('registerPassword')">
+                <i class="fas fa-eye text-muted" id="togglePassIcon"></i>
+              </button>
+            </div>
+            <small class="text-muted">Password must be at least 6 characters</small>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0">
+                <i class="fas fa-lock text-muted"></i>
+              </span>
+              <input type="password" class="form-control border-start-0" name="confirm_password" id="confirmPassword" placeholder="Confirm password" required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+              <label class="form-check-label" for="agreeTerms">
+                I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>
+              </label>
+            </div>
+          </div>
+
+          <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Note:</strong> New accounts require administrator approval before you can log in.
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn">
+            <i class="fas fa-user-plus me-2"></i>Create Account
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Already have an account? <a href="login.html">Sign in</a></p>
+        </div>
+      </div>
+
+      <!-- Pending Approval Notice -->
+      <div id="pendingNotice" style="display: none;">
+        <div class="text-center">
+          <div class="pending-notice">
+            <i class="fas fa-clock"></i>
+            <h4>Registration Successful!</h4>
+            <p class="mb-0">Your account has been created and is pending administrator approval.</p>
+          </div>
+          <p class="text-muted">You will receive an email notification once your account is activated.</p>
+          <p class="text-muted">If you have any questions, please contact your system administrator.</p>
+          <a href="login.html" class="btn btn-primary mt-3">
+            <i class="fas fa-sign-in-alt me-2"></i>Go to Login
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Toggle password visibility
+    function togglePassword(inputId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById('togglePassIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+
+    // Show toast notification
+    function showToast(title, message, type = 'info') {
+      const toastContainer = document.getElementById('toastContainer');
+      if (!toastContainer) return;
+
+      const toastId = 'toast-' + Date.now();
+      const bgClass = {
+        success: 'bg-success',
+        danger: 'bg-danger',
+        warning: 'bg-warning',
+        info: 'bg-info'
+      }[type] || 'bg-info';
+
+      const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              <strong>${title}</strong><br>
+              ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      `;
+
+      toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+      const toastElement = document.getElementById(toastId);
+      const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+      toast.show();
+
+      toastElement.addEventListener('hidden.bs.toast', function() {
+        toastElement.remove();
+      });
+    }
+
+    // Handle registration form submission
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('registerEmail').value.trim();
+      const department = document.getElementById('department').value;
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        showToast('Error', 'Passwords do not match!', 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+        return;
+      }
+
+      // Validate password length
+      if (password.length < 6) {
+        showToast('Error', 'Password must be at least 6 characters long!', 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            department: department,
+            password: password
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Show pending notice instead of auto-login
+          document.getElementById('registrationForm').style.display = 'none';
+          document.getElementById('pendingNotice').style.display = 'block';
+        } else {
+          showToast('Error', data.message || 'Registration failed', 'danger');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        showToast('Error', 'Cannot connect to server. Please make sure the server is running.', 'danger');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+      }
+    });
+
+    // Check if already logged in
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.ok) {
+          window.location.href = 'index.html';
+        }
+      } catch {}
+    });
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <!-- Custom JS -->
+  <script src="script.js"></script>
+  <!-- API Integration -->
+  <script src="api.js"></script>
+
+  <!-- Footer -->
+  <footer class="footer mt-5">
+    <div class="container">
+      <div class="row align-items-center text-center text-md-start">
+        <div class="col-md-4 mb-3 mb-md-0">
+          <strong>DocuManage</strong> &copy; 2026
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+          <a href="#">About</a> &nbsp;|&nbsp;
+          <a href="#">Contact</a> &nbsp;|&nbsp;
+          <a href="#">Services</a>
+        </div>
+        <div class="col-md-4 text-md-end brand-icons">
+          <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+          <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
+          <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
