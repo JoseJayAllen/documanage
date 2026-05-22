@@ -1,0 +1,3 @@
+register page: adjust to fit size the registration form, its too large to fit in a 100% zoom size of the webpage. split into two form if cannot fit.
+general: after logging in, It goes back to the login page if I click backtab of the browser. Fix this issue to prevent it. Fix the date too I think it has an error
+

@@ -3,134 +3,176 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - DocuManage</title>
-
-  <!-- Bootstrap 5 CSS -->
+  <title>Register - OQAADMS</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Custom CSS -->
   <link href="styles.css" rel="stylesheet">
   <style>
-    .pending-notice {
-      background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);
-      color: white;
-      border-radius: 0.5rem;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+    .auth-page { padding: 0.75rem; align-items: flex-start; padding-top: 1.25rem; }
+    .auth-card { max-height: none; overflow-y: visible; padding: 1.5rem; width: 100%; max-width: 520px; }
+    @media (min-width: 992px) { .auth-card { max-height: none; overflow-y: visible; } }
+    .form-check-label a { color: var(--primary-color); text-decoration: none; font-weight: 600; cursor: pointer; }
+    .step-wizard { display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; }
+    .step-item { display: flex; align-items: center; }
+    .step-circle { width: 28px; height: 28px; border-radius: 50%; background: var(--border-color); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; transition: all 0.3s ease; border: 2px solid transparent; }
+    .step-circle.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+    .step-circle.completed { background: var(--success-color); color: white; border-color: var(--success-color); }
+    .step-line { width: 50px; height: 3px; background: var(--border-color); margin: 0 0.75rem; border-radius: 3px; transition: all 0.3s ease; }
+    .step-line.active { background: var(--primary-color); }
+    .form-step { display: none; }
+    .form-step.active { display: block; animation: fadeIn 0.35s ease forwards; }
+    .auth-form .mb-2 { margin-bottom: 0.6rem !important; }
+    .auth-form .form-label { margin-bottom: 0.2rem; font-size: 0.8rem; font-weight: 700; color: var(--text-color); }
+    .auth-form .form-control, .auth-form .form-select { padding: 0.45rem 0.75rem; min-height: 38px; font-size: 0.9rem; }
+    .auth-form .input-group-text { padding: 0.45rem 0.75rem; }
+    .auth-footer { margin-top: 0.75rem; font-size: 0.85rem; }
+    .btn-nav { padding: 0.5rem 1rem; font-size: 0.9rem; font-weight: 600; }
+    .privacy-content { max-height: 60vh; overflow-y: auto; padding-right: 0.5rem; }
+    .privacy-content h6 { color: var(--primary-color); margin-top: 1rem; font-weight: 700; }
+    .privacy-content p { font-size: 0.9rem; line-height: 1.6; color: var(--text-color); }
+    .privacy-content ul { font-size: 0.9rem; padding-left: 1.25rem; }
+    .privacy-content li { margin-bottom: 0.35rem; }
+    .pending-notice { background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%); color: white; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .pending-notice i { font-size: 3rem; margin-bottom: 1rem; }
+    @media (max-height: 750px) {
+      .auth-page { padding-top: 0.5rem; }
+      .auth-logo { margin-bottom: 0.5rem; }
+      .auth-logo i { font-size: 2rem; margin-bottom: 0.25rem; }
+      .auth-logo h3 { font-size: 1.25rem; margin-bottom: 0.25rem; }
+      .step-wizard { margin-bottom: 0.75rem; }
     }
-    .pending-notice i {
-      font-size: 3rem;
-      margin-bottom: 1rem;
+    @media (max-width: 480px) {
+      .auth-card { padding: 1.25rem 1rem; }
+      .step-line { width: 30px; margin: 0 0.5rem; }
     }
   </style>
+  <base>
+<base>
 </head>
 <body>
   <div class="auth-page">
     <div class="auth-card fade-in">
-      <!-- Registration Form -->
       <div id="registrationForm">
         <div class="auth-logo">
           <i class="fas fa-folder-open"></i>
-          <h3>DocuManage</h3>
+          <h3>OQAADMS</h3>
           <p>Create your account</p>
         </div>
 
-        <form class="auth-form" id="registerForm">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">First Name</label>
-              <div class="input-group">
-                <span class="input-group-text bg-transparent border-end-0">
-                  <i class="fas fa-user text-muted"></i>
-                </span>
-                <input type="text" class="form-control border-start-0" name="first_name" id="firstName" placeholder="First name" required>
+        <!-- Step Wizard -->
+        <div class="step-wizard">
+          <div class="step-item">
+            <div class="step-circle active" id="step1Circle">1</div>
+            <span class="ms-2 small fw-bold text-primary" id="step1Label">Profile</span>
+          </div>
+          <div class="step-line" id="stepLine"></div>
+          <div class="step-item">
+            <div class="step-circle" id="step2Circle">2</div>
+            <span class="ms-2 small fw-bold text-muted" id="step2Label">Account</span>
+          </div>
+        </div>
+
+        <form class="auth-form" id="registerForm" onsubmit="return false;">
+          <!-- Step 1: Personal Information -->
+          <div class="form-step active" id="step1">
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <label class="form-label">First Name</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-transparent border-end-0"><i class="fas fa-user text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="firstName" placeholder="First name" required>
+                </div>
+              </div>
+              <div class="col-md-6 mb-2">
+                <label class="form-label">Last Name</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-transparent border-end-0"><i class="fas fa-user text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="lastName" placeholder="Last name" required>
+                </div>
               </div>
             </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Last Name</label>
+
+            <div class="mb-2">
+              <label class="form-label">Email Address</label>
               <div class="input-group">
-                <span class="input-group-text bg-transparent border-end-0">
-                  <i class="fas fa-user text-muted"></i>
-                </span>
-                <input type="text" class="form-control border-start-0" name="last_name" id="lastName" placeholder="Last name" required>
+                <span class="input-group-text bg-transparent border-end-0"><i class="fas fa-envelope text-muted"></i></span>
+                <input type="email" class="form-control border-start-0" id="registerEmail" placeholder="Enter your email" required>
               </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <label class="form-label">Email Address</label>
-            <div class="input-group">
-              <span class="input-group-text bg-transparent border-end-0">
-                <i class="fas fa-envelope text-muted"></i>
-              </span>
-              <input type="email" class="form-control border-start-0" name="email" id="registerEmail" placeholder="Enter your email" required>
+            <div class="mb-2">
+              <label class="form-label">ID Number</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0"><i class="fas fa-id-card text-muted"></i></span>
+                <input type="text" class="form-control border-start-0" id="idNumber" placeholder="Enter your ID number" required>
+              </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <label class="form-label">Department</label>
-            <div class="input-group">
-              <span class="input-group-text bg-transparent border-end-0">
-                <i class="fas fa-building text-muted"></i>
-              </span>
-              <select class="form-select border-start-0" name="department" id="department">
-                <option value="">Select Department (Optional)</option>
-                <option value="Administration">Administration</option>
-                <option value="Human Resources">Human Resources</option>
-                <option value="Information Technology">Information Technology</option>
-                <option value="Finance">Finance</option>
-                <option value="Operations">Operations</option>
-              </select>
+            <div class="mb-2">
+              <label class="form-label">Department</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0"><i class="fas fa-building text-muted"></i></span>
+                <select class="form-select border-start-0" id="department">
+                  <option value="">Select Department (Optional)</option>
+                  <option value="Administration">Administration</option>
+                  <option value="Human Resources">Human Resources</option>
+                  <option value="Information Technology">Information Technology</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Operations">Operations</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <label class="form-label">Password</label>
-            <div class="input-group">
-              <span class="input-group-text bg-transparent border-end-0">
-                <i class="fas fa-lock text-muted"></i>
-              </span>
-              <input type="password" class="form-control border-start-0" name="password" id="registerPassword" placeholder="Create password" required minlength="6">
-              <button type="button" class="input-group-text bg-transparent border-start-0" onclick="togglePassword('registerPassword')">
-                <i class="fas fa-eye text-muted" id="togglePassIcon"></i>
+            <div class="d-grid mt-3">
+              <button type="button" class="btn btn-primary btn-nav" onclick="goToStep(2)">
+                Next: Account Setup <i class="fas fa-arrow-right ms-1"></i>
               </button>
             </div>
-            <small class="text-muted">Password must be at least 6 characters</small>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label">Confirm Password</label>
-            <div class="input-group">
-              <span class="input-group-text bg-transparent border-end-0">
-                <i class="fas fa-lock text-muted"></i>
-              </span>
-              <input type="password" class="form-control border-start-0" name="confirm_password" id="confirmPassword" placeholder="Confirm password" required>
+          <!-- Step 2: Account Security -->
+          <div class="form-step" id="step2">
+            <div class="mb-2">
+              <label class="form-label">Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0"><i class="fas fa-lock text-muted"></i></span>
+                <input type="password" class="form-control border-start-0" id="registerPassword" placeholder="Create password" required minlength="6">
+                <button type="button" class="input-group-text bg-transparent border-start-0" onclick="togglePassword('registerPassword')">
+                  <i class="fas fa-eye text-muted" id="togglePassIcon"></i>
+                </button>
+              </div>
+              <small class="text-muted">Password must be at least 6 characters</small>
+            </div>
+
+            <div class="mb-2">
+              <label class="form-label">Confirm Password</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0"><i class="fas fa-lock text-muted"></i></span>
+                <input type="password" class="form-control border-start-0" id="confirmPassword" placeholder="Confirm password" required>
+              </div>
+            </div>
+
+            <div class="mb-2">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                <label class="form-check-label" for="agreeTerms">I agree to the <a onclick="openPrivacyModal(); return false;">Privacy Policy</a></label>
+              </div>
+            </div>
+
+            <div class="alert alert-info mb-2 py-2">
+              <i class="fas fa-info-circle me-2"></i><strong>Note:</strong> New accounts require administrator approval.
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+              <button type="button" class="btn btn-outline-secondary btn-nav" onclick="goToStep(1)">
+                <i class="fas fa-arrow-left me-1"></i> Back
+              </button>
+              <button type="submit" class="btn btn-primary btn-nav flex-fill" id="submitBtn">
+                <i class="fas fa-user-plus me-2"></i>Create Account
+              </button>
             </div>
           </div>
-
-          <div class="mb-4">
-            <div class="form-check">
-              <input type="checkbox" class="form-check-input" id="agreeTerms" required>
-              <label class="form-check-label" for="agreeTerms">
-                I agree to the <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Privacy Policy</a>
-              </label>
-            </div>
-          </div>
-
-          <div class="alert alert-info mb-3">
-            <i class="fas fa-info-circle me-2"></i>
-            <strong>Note:</strong> New accounts require administrator approval before you can log in.
-          </div>
-
-          <button type="submit" class="btn btn-primary w-100 mb-3" id="submitBtn">
-            <i class="fas fa-user-plus me-2"></i>Create Account
-          </button>
         </form>
 
         <div class="auth-footer">
@@ -138,7 +180,6 @@
         </div>
       </div>
 
-      <!-- Pending Approval Notice -->
       <div id="pendingNotice" style="display: none;">
         <div class="text-center">
           <div class="pending-notice">
@@ -148,22 +189,101 @@
           </div>
           <p class="text-muted">You will receive an email notification once your account is activated.</p>
           <p class="text-muted">If you have any questions, please contact your system administrator.</p>
-          <a href="login.html" class="btn btn-primary mt-3">
-            <i class="fas fa-sign-in-alt me-2"></i>Go to Login
-          </a>
+          <a href="login.html" class="btn btn-primary mt-3"><i class="fas fa-sign-in-alt me-2"></i>Go to Login</a>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Toast Container -->
+  <!-- Privacy Policy Modal -->
+  <div class="modal fade" id="privacyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-shield-alt me-2 text-primary"></i>Privacy Policy</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="privacy-content">
+            <h6>1. Introduction</h6>
+            <p>OQAADMS (Office of Quality Assurance & Accreditation Document Management System) is committed to protecting your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your data when you use our platform.</p>
+
+            <h6>2. Information We Collect</h6>
+            <p>We collect the following types of information to provide and improve our services:</p>
+            <ul>
+              <li><strong>Personal Identifiers:</strong> Full name, institutional email address, employee ID number, and department affiliation.</li>
+              <li><strong>Account Information:</strong> Encrypted password, assigned user role (admin, editor, viewer), and account status.</li>
+              <li><strong>System Activity:</strong> Documents you upload, download, or manage; timestamps of your actions; and IP addresses for security auditing.</li>
+              <li><strong>Optional Data:</strong> Phone number and profile photograph, if voluntarily provided.</li>
+            </ul>
+
+            <h6>3. How We Use Your Information</h6>
+            <p>Your data is used strictly for the following purposes:</p>
+            <ul>
+              <li>Authenticating your identity and enforcing role-based access controls.</li>
+              <li>Maintaining a complete audit trail for institutional compliance and security.</li>
+              <li>Generating system announcements, weekly reports, and operational updates.</li>
+              <li>Contacting you regarding account activation, password resets, or policy changes.</li>
+            </ul>
+
+            <h6>4. Data Protection & Security</h6>
+            <p>We implement industry-standard safeguards including bcrypt password hashing, HTTPS encryption for data in transit, and strict access controls. Audit logs are retained for a minimum of two years in accordance with institutional policy. Physical and digital access to servers is restricted to authorized IT personnel only.</p>
+
+            <h6>5. Cookies & Local Storage</h6>
+            <p>We use browser local storage solely to remember your display preferences (such as dark mode) and to cache non-sensitive UI state. No third-party advertising or tracking cookies are used.</p>
+
+            <h6>6. Third-Party Disclosure</h6>
+            <p>We do not sell, trade, or transfer your personally identifiable information to outside parties. Aggregated, non-identifiable statistics may be shared with institutional stakeholders for reporting purposes.</p>
+
+            <h6>7. Your Rights</h6>
+            <p>As a user, you have the right to:</p>
+            <ul>
+              <li>Access, review, and update your profile information at any time.</li>
+              <li>Request an export of your personal data and document history.</li>
+              <li>Request account deactivation, subject to institutional document-retention policies.</li>
+              <li>Opt out of non-essential system notifications via your profile settings.</li>
+            </ul>
+
+            <h6>8. Data Retention</h6>
+            <p>Account profiles are retained while your account remains active. Inactive accounts may be archived after 24 months. Uploaded documents are governed by the institutional document retention schedule and may be archived separately from account data.</p>
+
+            <h6>9. Changes to This Policy</h6>
+            <p>We may update this Privacy Policy periodically to reflect changes in legal requirements or system functionality. Users will be notified of material changes through the system announcement board or via email.</p>
+
+            <h6>10. Contact Us</h6>
+            <p>If you have questions, concerns, or requests regarding this Privacy Policy, please contact your system administrator or email <strong>office@bsu.edu.ph</strong>.</p>
+
+            <p class="text-muted small mt-3 mb-0"><em>Last updated: May 2026 &mdash; Version 2.0</em></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="document.getElementById('agreeTerms').focus();">I Understand</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed auth footer bar -->
+  <div class="auth-footer-bar">
+    <div class="footer-brand"><strong>OQAADMS</strong> &copy; 2026</div>
+    <div class="footer-images">
+      <img src="static/img/first.png" alt="Partner 1" class="footer-img">
+      <img src="static/img/second.jpg" alt="Partner 2" class="footer-img">
+      <img src="static/img/third.png" alt="Partner 3" class="footer-img">
+      <img src="static/img/fourth.png" alt="Partner 4" class="footer-img">
+    </div>
+    <div class="footer-social">
+          <a href="https://facebook.com/share/1FnVMMFf92" target="_blank" rel="noopener noreferrer" title="Facebook"><i class="fab fa-facebook"></i></a>
+          <a href="mailto:office@bsu.edu.ph" class="footer-email" title="Send Email"><i class="fas fa-envelope"></i> office@bsu.edu.ph</a>
+    </div>
+  </div>
+
   <div class="toast-container" id="toastContainer"></div>
-
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+  <script src="api.js"></script>
+  <script src="script.js"></script>
   <script>
-    // Toggle password visibility
     function togglePassword(inputId) {
       const input = document.getElementById(inputId);
       const icon = document.getElementById('togglePassIcon');
@@ -178,42 +298,41 @@
       }
     }
 
-    // Show toast notification
-    function showToast(title, message, type = 'info') {
-      const toastContainer = document.getElementById('toastContainer');
-      if (!toastContainer) return;
+    function goToStep(step) {
+      if (step === 2) {
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const email = document.getElementById('registerEmail').value.trim();
+        const idNumber = document.getElementById('idNumber').value.trim();
+        const emailInput = document.getElementById('registerEmail');
 
-      const toastId = 'toast-' + Date.now();
-      const bgClass = {
-        success: 'bg-success',
-        danger: 'bg-danger',
-        warning: 'bg-warning',
-        info: 'bg-info'
-      }[type] || 'bg-info';
+        if (!firstName || !lastName || !email || !idNumber) {
+          showToast('Validation Error', 'Please fill in all required fields before continuing.', 'danger');
+          return;
+        }
+        if (!emailInput.checkValidity()) {
+          showToast('Validation Error', 'Please enter a valid email address.', 'danger');
+          emailInput.focus();
+          return;
+        }
+      }
 
-      const toastHtml = `
-        <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="d-flex">
-            <div class="toast-body">
-              <strong>${title}</strong><br>
-              ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-        </div>
-      `;
+      document.getElementById('step1').classList.toggle('active', step === 1);
+      document.getElementById('step2').classList.toggle('active', step === 2);
 
-      toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-      const toastElement = document.getElementById(toastId);
-      const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
-      toast.show();
+      document.getElementById('step1Circle').className = 'step-circle ' + (step === 1 ? 'active' : 'completed');
+      document.getElementById('step2Circle').className = 'step-circle ' + (step === 2 ? 'active' : '');
 
-      toastElement.addEventListener('hidden.bs.toast', function() {
-        toastElement.remove();
-      });
+      document.getElementById('step1Label').className = 'ms-2 small fw-bold ' + (step === 1 ? 'text-primary' : 'text-muted');
+      document.getElementById('step2Label').className = 'ms-2 small fw-bold ' + (step === 2 ? 'text-primary' : 'text-muted');
+
+      document.getElementById('stepLine').classList.toggle('active', step === 2);
     }
 
-    // Handle registration form submission
+    function openPrivacyModal() {
+      new bootstrap.Modal(document.getElementById('privacyModal')).show();
+    }
+
     document.getElementById('registerForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
@@ -228,7 +347,6 @@
       const password = document.getElementById('registerPassword').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
-      // Validate passwords match
       if (password !== confirmPassword) {
         showToast('Error', 'Passwords do not match!', 'danger');
         submitBtn.disabled = false;
@@ -236,7 +354,6 @@
         return;
       }
 
-      // Validate password length
       if (password.length < 6) {
         showToast('Error', 'Password must be at least 6 characters long!', 'danger');
         submitBtn.disabled = false;
@@ -245,78 +362,58 @@
       }
 
       try {
-        const response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            first_name: firstName,
-            last_name: lastName,
-            email: email,
-            department: department,
-            password: password
-          })
+        const idNumber = document.getElementById('idNumber').value.trim();
+
+        if (!idNumber) {
+          showToast('Error', 'ID Number is required!', 'danger');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+          return;
+        }
+
+        const result = await AuthAPI.register({
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          department: department,
+          id_number: idNumber,
+          password: password
         });
 
-        const data = await response.json();
-
-        if (data.success) {
-          // Show pending notice instead of auto-login
+        if (result.success) {
           document.getElementById('registrationForm').style.display = 'none';
           document.getElementById('pendingNotice').style.display = 'block';
         } else {
-          showToast('Error', data.message || 'Registration failed', 'danger');
+          showToast('Error', result.message || 'Registration failed', 'danger');
           submitBtn.disabled = false;
           submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
         }
       } catch (error) {
         console.error('Registration error:', error);
-        showToast('Error', 'Cannot connect to server. Please make sure the server is running.', 'danger');
+        showToast('Error', 'Cannot connect to server. Please ensure the server is running.', 'danger');
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
       }
     });
 
-    // Check if already logged in
-    document.addEventListener('DOMContentLoaded', async function() {
+    // Back-button protection: redirect authenticated users away from register
+    async function checkAuthAndRedirect() {
       try {
         const res = await fetch('/api/auth/me', { credentials: 'include' });
         if (res.ok) {
-          window.location.href = 'index.html';
+          const data = await res.json();
+          if (data && data.id) window.location.replace('home.html');
         }
-      } catch {}
+      } catch (e) {}
+    }
+
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) checkAuthAndRedirect();
+    });
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      await checkAuthAndRedirect();
     });
   </script>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Custom JS -->
-  <!-- Custom JS -->
-  <script src="script.js"></script>
-  <!-- API Integration -->
-  <script src="api.js"></script>
-
-  <!-- Footer -->
-  <footer class="footer mt-5">
-    <div class="container">
-      <div class="row align-items-center text-center text-md-start">
-        <div class="col-md-4 mb-3 mb-md-0">
-          <strong>DocuManage</strong> &copy; 2026
-        </div>
-        <div class="col-md-4 mb-3 mb-md-0">
-          <a href="#">About</a> &nbsp;|&nbsp;
-          <a href="#">Contact</a> &nbsp;|&nbsp;
-          <a href="#">Services</a>
-        </div>
-        <div class="col-md-4 text-md-end brand-icons">
-          <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
-          <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
-          <a href="#" title="GitHub"><i class="fab fa-github"></i></a>
-          <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
-        </div>
-      </div>
-    </div>
-  </footer>
 </body>
 </html>

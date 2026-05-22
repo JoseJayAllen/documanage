@@ -5,19 +5,16 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'documanage-dev-secret-key'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'oqaadms-dev-secret-key'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    UPLOAD_FOLDER = os.path.join(basedir, 'static', 'templates/uploads')
+    UPLOAD_FOLDER = os.path.join(basedir, 'static', 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
 
-    # MySQL Configuration
-    MYSQL_HOST = os.environ.get('MYSQL_HOST') or 'localhost'
-    MYSQL_PORT = os.environ.get('MYSQL_PORT') or '3306'
-    MYSQL_USER = os.environ.get('MYSQL_USER') or 'root'
-    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD') or 'root'
-    MYSQL_DB = os.environ.get('MYSQL_DB') or 'documanage'
-
-    SQLALCHEMY_DATABASE_URI = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DB}"
+    # Database: SQLite by default for instant setup. Override with DATABASE_URL env var for MySQL.
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        'DATABASE_URL',
+        'sqlite:///' + os.path.join(basedir, 'oqaadms.db')
+    )
 
 
 class DevelopmentConfig(Config):
