@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - OQAADMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+<base>
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-top-image d-none d-md-block">
+      <a href="https://facebook.com/share/1FnVMMFf92"><img src="static/img/top.png" alt="OQAADMS Logo" class="sidebar-logo-img"></a>
+    </div>
+    <div class="sidebar-bottom-image d-none d-md-block">
+      <a href="home.html"><img src="static/img/bottom.png" alt="OQAADMS Bottom" class="sidebar-bottom-img"></a>
+    </div>
+    <div class="sidebar-brand">
+      <h4><i class="fas fa-folder-open"></i><span>OQAADMS</span></h4>
+    </div>
+    <div class="sidebar-menu">
+      <ul class="nav flex-column">
+        <li class="nav-item"><a href="home.html" class="nav-link active"><i class="fas fa-home"></i><span>Home</span></a></li>
+        <li class="nav-item"><a href="index.html" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Files</span></a></li>
+        <li class="nav-item"><a href="profile.html" class="nav-link"><i class="fas fa-user"></i><span>Profile</span></a></li>
+        <li class="nav-item admin-only" style="display: none;"><a href="accounts.html" class="nav-link"><i class="fas fa-users"></i><span>Accounts</span></a></li>
+        <li class="nav-item admin-only" style="display: none;"><a href="history.html" class="nav-link"><i class="fas fa-history"></i><span>History</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="main-content" id="mainContent">
+    <nav class="top-navbar">
+      <button class="toggle-sidebar" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+      <div class="navbar-right">
+        <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+        <div class="dropdown">
+          <div class="user-dropdown" data-bs-toggle="dropdown">
+            <img src="https://ui-avatars.com/api/?name=User&background=4e73df&color=fff" alt="User" class="user-avatar">
+            <span class="user-name d-none d-lg-block">Loading...</span>
+            <i class="fas fa-chevron-down d-none d-lg-block" style="font-size: 0.7rem; color: #858796;"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="content-area">
+      <div class="page-header">
+        <h2><i class="fas fa-home me-2"></i>Home</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="home.html">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- Feature 2: Dynamic Personalized Welcome Message -->
+      <div class="alert alert-light mb-4">
+        <i class="fas fa-info-circle me-2"></i>
+        <span id="welcomeMessage">Welcome to OQAADMS!</span>
+      </div>
+
+      <!-- Feature 1: Statistics Cards (Admin-Only) -->
+      <!-- Hidden by default; shown via JS only after admin role verification -->
+      <div class="admin-only" style="display: none;">
+        <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stats-card primary">
+            <div class="d-flex justify-content-between align-items-center">
+              <div><div class="stats-label">Total Files</div><div class="stats-value" id="totalFiles">0</div></div>
+              <i class="fas fa-file-alt stats-icon"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stats-card success">
+            <div class="d-flex justify-content-between align-items-center">
+              <div><div class="stats-label">Total Users</div><div class="stats-value" id="totalUsers">0</div></div>
+              <i class="fas fa-users stats-icon"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stats-card info">
+            <div class="d-flex justify-content-between align-items-center">
+              <div><div class="stats-label">Storage Used</div><div class="stats-value" id="totalStorage">0 MB</div></div>
+              <i class="fas fa-hdd stats-icon"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stats-card warning">
+            <div class="d-flex justify-content-between align-items-center">
+              <div><div class="stats-label">Recent Activity</div><div class="stats-value" id="recentActivity">0</div></div>
+              <i class="fas fa-chart-line stats-icon"></i>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h6><i class="fas fa-newspaper me-2"></i>Company News & Announcements</h6>
+          <button class="btn btn-primary btn-sm admin-only" id="addPostBtn" style="display: none;" onclick="openAddPostModal()">
+            <i class="fas fa-plus me-1"></i> Add New Post
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-2 mb-4" id="categoryFilters">
+            <button class="btn btn-sm btn-primary active" onclick="filterPosts('all')">All Posts</button>
+            <button class="btn btn-sm btn-outline-primary" onclick="filterPosts('announcement')"><i class="fas fa-bullhorn me-1"></i>Announcements</button>
+            <button class="btn btn-sm btn-outline-primary" onclick="filterPosts('weekly_report')"><i class="fas fa-chart-bar me-1"></i>Weekly Reports</button>
+            <button class="btn btn-sm btn-outline-primary" onclick="filterPosts('update')"><i class="fas fa-sync me-1"></i>Updates</button>
+            <button class="btn btn-sm btn-outline-primary" onclick="filterPosts('general')"><i class="fas fa-info-circle me-1"></i>General</button>
+          </div>
+          <div class="row" id="postsGrid">
+            <div class="col-12 text-center py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2 text-muted">Loading announcements...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-inner">
+        <div class="footer-images">
+          <img src="static/img/first.png" alt="Partner 1" class="footer-img">
+          <img src="static/img/second.jpg" alt="Partner 2" class="footer-img">
+          <img src="static/img/third.png" alt="Partner 3" class="footer-img">
+          <img src="static/img/fourth.png" alt="Partner 4" class="footer-img">
+        </div>
+        <div class="footer-social">
+          <a href="https://facebook.com/share/1FnVMMFf92" target="_blank" rel="noopener noreferrer" title="Facebook"><i class="fab fa-facebook"></i></a>
+          <a href="mailto:oqaa.office@bsu.edu.ph" class="footer-email" title="Send Email"><i class="fas fa-envelope"></i> oqaa.office@bsu.edu.ph</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Add/Edit Post Modal -->
+  <div class="modal fade" id="postModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="postModalTitle"><i class="fas fa-edit me-2"></i>Add New Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="postForm">
+            <input type="hidden" id="postId">
+            <div class="mb-3">
+              <label class="form-label">Title *</label>
+              <input type="text" class="form-control" id="postTitle" placeholder="Enter post title" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Category *</label>
+              <select class="form-select" id="postCategory" required>
+                <option value="announcement">Announcement</option>
+                <option value="weekly_report">Weekly Report</option>
+                <option value="update">Update</option>
+                <option value="general">General</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Content *</label>
+              <textarea class="form-control" id="postContent" rows="8" placeholder="Write your post content here..." required></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitPostForm()"><i class="fas fa-save me-2"></i>Save Post</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Full Post Modal -->
+  <div class="modal fade" id="viewPostModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="viewPostTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex justify-content-between mb-3">
+            <div><span class="badge" id="viewPostCategory"></span></div>
+            <div class="text-muted small" id="viewPostMeta"></div>
+          </div>
+          <div class="post-full-content" id="viewPostContent" style="white-space: pre-wrap; line-height: 1.7;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-outline-primary admin-only" id="editFromViewBtn" style="display: none;" onclick="editFromView()"><i class="fas fa-edit me-1"></i> Edit</button>
+          <button type="button" class="btn btn-outline-danger admin-only" id="deleteFromViewBtn" style="display: none;" onclick="deleteFromView()"><i class="fas fa-trash me-1"></i> Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="api.js"></script>
+  <script src="script.js"></script>
+  <script>
+    let postsData = [];
+    let currentPostFilter = 'all';
+    let currentEditPostId = null;
+    let currentViewPostId = null;
+    let currentUserRole = null;
+
+    async function loadCurrentUserForHome() {
+      try {
+        const user = await AuthAPI.getCurrentUser();
+        currentUserRole = user.role;
+        safeStorage.setItem('currentUser', JSON.stringify(user));
+
+        // Update UI elements with user info
+        document.querySelectorAll('.user-name').forEach(el => {
+          el.textContent = user.name || user.email;
+        });
+
+        document.querySelectorAll('.user-avatar').forEach(el => {
+          el.src = user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=4e73df&color=fff`;
+        });
+
+        // Feature 2: Personalize welcome message with user's full name
+        const welcomeEl = document.getElementById('welcomeMessage');
+        if (welcomeEl && user) {
+          const displayName = user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'User';
+          welcomeEl.textContent = `Welcome, ${displayName}`;
+        }
+
+        // Feature 1: Show admin-only elements (including statistics cards) if user is admin
+        if (user.role === 'admin') {
+          const addBtn = document.getElementById('addPostBtn');
+          if (addBtn) addBtn.style.display = 'inline-block';
+          document.querySelectorAll('.admin-only').forEach(el => {
+            el.style.display = '';
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load user:', error);
+      }
+    }
+
+    async function loadPosts() {
+      try {
+        const container = document.getElementById('postsGrid');
+        container.innerHTML = `<div class="col-12 text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Loading announcements...</p></div>`;
+        postsData = await AnnouncementsAPI.getAll();
+        renderPosts(postsData);
+      } catch (error) {
+        console.error('Failed to load posts:', error);
+        document.getElementById('postsGrid').innerHTML = `<div class="col-12 text-center py-5"><i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i><p class="text-muted">Failed to load announcements.</p></div>`;
+      }
+    }
+
+    function renderPosts(posts) {
+      const container = document.getElementById('postsGrid');
+      if (!posts || posts.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center py-5"><i class="fas fa-newspaper fa-3x text-muted mb-3"></i><h5 class="text-muted">No posts yet</h5></div>`;
+        return;
+      }
+      let filtered = posts;
+      if (currentPostFilter !== 'all') filtered = posts.filter(p => p.category === currentPostFilter);
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center py-4"><p class="text-muted">No posts in this category.</p></div>`;
+        return;
+      }
+      const categoryColors = { 'announcement': 'primary', 'weekly_report': 'success', 'update': 'info', 'general': 'secondary' };
+      container.innerHTML = filtered.map(post => {
+        const isAdmin = currentUserRole === 'admin';
+        const catColor = categoryColors[post.category] || 'secondary';
+        const catLabel = post.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const shortContent = post.content.length > 180 ? post.content.substring(0, 180) + '...' : post.content;
+        return `
+          <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm post-card" style="cursor: pointer;" onclick="viewPost(${post.id})">
+              <div class="card-header bg-transparent d-flex justify-content-between align-items-center py-2">
+                <span class="badge bg-${catColor}">${catLabel}</span>
+                ${isAdmin ? `<div class="btn-group btn-group-sm"><button class="btn btn-outline-primary btn-sm" onclick="event.stopImmediatePropagation(); editPost(${post.id});"><i class="fas fa-edit"></i></button><button class="btn btn-outline-danger btn-sm" onclick="event.stopImmediatePropagation(); deletePost(${post.id});"><i class="fas fa-trash"></i></button></div>` : ''}
+              </div>
+              <div class="card-body">
+                <h6 class="card-title fw-bold mb-2">${post.title}</h6>
+                <p class="card-text text-muted small mb-3" style="line-height: 1.5;">${shortContent}</p>
+              </div>
+              <div class="card-footer bg-transparent d-flex align-items-center justify-content-between py-2">
+                <div class="d-flex align-items-center">
+                  <img src="${post.author_avatar || 'https://ui-avatars.com/api/?name=User&background=4e73df&color=fff'}" class="rounded-circle me-2" width="28" height="28" alt="${post.author}">
+                  <small class="text-muted">${post.author}</small>
+                </div>
+                <small class="text-muted">${post.time_ago || post.date}</small>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function filterPosts(category) {
+      currentPostFilter = category;
+      document.querySelectorAll('#categoryFilters .btn').forEach(btn => {
+        btn.classList.remove('active', 'btn-primary');
+        btn.classList.add('btn-outline-primary');
+        const map = {'all':'All','announcement':'Announcements','weekly_report':'Weekly','update':'Updates','general':'General'};
+        if (btn.textContent.includes(map[category])) {
+          btn.classList.add('active', 'btn-primary');
+          btn.classList.remove('btn-outline-primary');
+        }
+      });
+      renderPosts(postsData);
+    }
+
+    function openAddPostModal() {
+      currentEditPostId = null;
+      document.getElementById('postModalTitle').innerHTML = '<i class="fas fa-plus me-2"></i>Add New Post';
+      document.getElementById('postForm').reset();
+      document.getElementById('postId').value = '';
+      new bootstrap.Modal(document.getElementById('postModal')).show();
+    }
+
+    async function submitPostForm() {
+      const title = document.getElementById('postTitle').value.trim();
+      const content = document.getElementById('postContent').value.trim();
+      const category = document.getElementById('postCategory').value;
+      const postId = document.getElementById('postId').value;
+      if (!title || !content) { showToast('Error', 'Title and content are required', 'danger'); return; }
+      try {
+        if (postId) {
+          await AnnouncementsAPI.update(postId, { title, content, category });
+          showToast('Success', 'Post updated successfully', 'success');
+        } else {
+          await AnnouncementsAPI.create({ title, content, category });
+          showToast('Success', 'Post created successfully', 'success');
+        }
+        bootstrap.Modal.getInstance(document.getElementById('postModal')).hide();
+        loadPosts();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to save post', 'danger');
+      }
+    }
+
+    async function editPost(postId) {
+      const post = postsData.find(p => p.id === postId);
+      if (!post) return;
+      currentEditPostId = postId;
+      document.getElementById('postModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Post';
+      document.getElementById('postId').value = postId;
+      document.getElementById('postTitle').value = post.title;
+      document.getElementById('postContent').value = post.content;
+      document.getElementById('postCategory').value = post.category;
+      new bootstrap.Modal(document.getElementById('postModal')).show();
+    }
+
+    async function deletePost(postId) {
+      if (!confirm('Are you sure you want to delete this post?')) return;
+      try {
+        await AnnouncementsAPI.delete(postId);
+        showToast('Success', 'Post deleted successfully', 'success');
+        loadPosts();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to delete post', 'danger');
+      }
+    }
+
+    function viewPost(postId) {
+      const post = postsData.find(p => p.id === postId);
+      if (!post) return;
+      currentViewPostId = postId;
+      document.getElementById('viewPostTitle').textContent = post.title;
+      document.getElementById('viewPostContent').textContent = post.content;
+      const catEl = document.getElementById('viewPostCategory');
+      const catColors = { 'announcement': 'primary', 'weekly_report': 'success', 'update': 'info', 'general': 'secondary' };
+      catEl.className = `badge bg-${catColors[post.category] || 'secondary'}`;
+      catEl.textContent = post.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      document.getElementById('viewPostMeta').innerHTML = `<i class="fas fa-user me-1"></i>${post.author} &nbsp;&bull;&nbsp; <i class="fas fa-clock me-1"></i>${post.date || post.time_ago}`;
+      const editBtn = document.getElementById('editFromViewBtn');
+      const deleteBtn = document.getElementById('deleteFromViewBtn');
+      if (currentUserRole === 'admin') { editBtn.style.display = 'inline-block'; deleteBtn.style.display = 'inline-block'; }
+      else { editBtn.style.display = 'none'; deleteBtn.style.display = 'none'; }
+      new bootstrap.Modal(document.getElementById('viewPostModal')).show();
+    }
+
+    function editFromView() {
+      bootstrap.Modal.getInstance(document.getElementById('viewPostModal')).hide();
+      setTimeout(() => editPost(currentViewPostId), 300);
+    }
+
+    function deleteFromView() {
+      bootstrap.Modal.getInstance(document.getElementById('viewPostModal')).hide();
+      setTimeout(() => deletePost(currentViewPostId), 300);
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadCurrentUserForHome();
+      await loadPosts();
+      // Only fetch statistics for admin users to avoid 403 errors for non-admins
+      if (currentUserRole === 'admin') {
+        try {
+          const stats = await StatsAPI.get();
+          document.getElementById('totalFiles').textContent = stats.total_files || 0;
+          document.getElementById('totalUsers').textContent = stats.total_users || 0;
+          document.getElementById('totalStorage').textContent = stats.storage_used || '0 MB';
+          document.getElementById('recentActivity').textContent = stats.recent_activity || 0;
+        } catch(e) { console.log('Stats load skipped'); }
+      }
+    });
+  </script>
+</body>
+</html>

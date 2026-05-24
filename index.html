@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Files - OQAADMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .folder-card { position: relative; }
+    .folder-actions { opacity: 0; transition: opacity 0.2s ease; }
+    .folder-card:hover .folder-actions { opacity: 1; }
+    @media (max-width: 767.98px) {
+      .folder-actions { opacity: 1; }
+    }
+    .upload-folder-select { max-width: 400px; margin: 0 auto 1.5rem; }
+    .current-filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg-color);
+      border-radius: 0.5rem;
+      border: 1px solid var(--border-color);
+    }
+  </style>
+<base>
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-top-image d-none d-md-block">
+      <a href="https://facebook.com/share/1FnVMMFf92"><img src="static/img/top.png" alt="OQAADMS Logo" class="sidebar-logo-img"></a>
+    </div>
+    <div class="sidebar-bottom-image d-none d-md-block">
+      <a href="home.html"><img src="static/img/bottom.png" alt="OQAADMS Bottom" class="sidebar-bottom-img"></a>
+    </div>
+    <div class="sidebar-brand">
+      <h4><i class="fas fa-folder-open"></i><span>OQAADMS</span></h4>
+    </div>
+    <div class="sidebar-menu">
+      <ul class="nav flex-column">
+        <li class="nav-item"><a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a></li>
+        <li class="nav-item"><a href="index.html" class="nav-link active"><i class="fas fa-tachometer-alt"></i><span>Files</span></a></li>
+        <li class="nav-item"><a href="profile.html" class="nav-link"><i class="fas fa-user"></i><span>Profile</span></a></li>
+        <li class="nav-item admin-only" style="display: none;"><a href="accounts.html" class="nav-link"><i class="fas fa-users"></i><span>Accounts</span></a></li>
+        <li class="nav-item admin-only" style="display: none;"><a href="history.html" class="nav-link"><i class="fas fa-history"></i><span>History</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="main-content" id="mainContent">
+    <nav class="top-navbar">
+      <button class="toggle-sidebar" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+      <div class="navbar-right">
+        <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+        <div class="dropdown">
+          <div class="user-dropdown" data-bs-toggle="dropdown">
+            <img src="https://ui-avatars.com/api/?name=User&background=4e73df&color=fff" alt="User" class="user-avatar">
+            <span class="user-name d-none d-lg-block">USER</span>
+            <i class="fas fa-chevron-down d-none d-lg-block" style="font-size: 0.7rem; color: #858796;"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="content-area">
+      <div class="page-header">
+        <h2>Files</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="home.html">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Files</li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- Quick Upload Dropdown -->
+      <div class="card mb-4">
+        <div class="card-header" id="uploadDropdownHeader" style="cursor: pointer;" onclick="toggleUploadDropdown()">
+          <h6><i class="fas fa-upload me-2"></i>Quick Upload</h6>
+          <i class="fas fa-chevron-down" id="uploadDropdownIcon" style="transition: transform 0.3s ease;"></i>
+        </div>
+        <div class="card-body" id="uploadDropdownBody" style="display: none;">
+          <!-- Folder Selection -->
+          <div class="upload-folder-select">
+            <label class="form-label d-block text-center"><i class="fas fa-folder-open me-2 text-primary"></i>Select Destination Folder</label>
+            <div class="input-group input-group-sm">
+              <select class="form-select" id="uploadFolderSelect">
+                <option value="">Select Folder (Optional)</option>
+                <option value="uncategorized">Uncategorized</option>
+              </select>
+              <button class="btn btn-outline-primary" type="button" onclick="new bootstrap.Modal(document.getElementById('miniCreateFolderModal')).show()" title="Create New Folder">
+                <i class="fas fa-plus"></i> New
+              </button>
+            </div>
+          </div>
+          <div class="upload-area" id="uploadArea">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h5>Drag & Drop files here</h5>
+            <p>or click to browse files from your computer</p>
+            <button type="button" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Select Files</button>
+            <input type="file" id="fileInput" multiple style="display: none;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Folders Section -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h6><i class="fas fa-folder me-2"></i>My Folders</h6>
+          <button class="btn btn-primary btn-sm" onclick="new bootstrap.Modal(document.getElementById('createFolderModal')).show()">
+            <i class="fas fa-plus me-1"></i>New Folder
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row" id="foldersGrid"></div>
+          <div id="noFoldersMsg" class="text-center py-4 text-muted d-none">
+            <i class="fas fa-folder-open fa-3x mb-2"></i>
+            <p>No folders yet. Create your first folder!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- My Files Section -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h6 class="mb-0"><i class="fas fa-file me-2"></i>Files</h6>
+            <span id="currentFolderLabel" class="badge bg-primary" style="display: none;"></span>
+          </div>
+          <div class="d-flex gap-2 align-items-center flex-wrap">
+            <input type="text" id="fileSearch" class="form-control form-control-sm" placeholder="Search files..." style="width: 200px;" oninput="filterDashboardFiles()">
+            <div class="btn-group btn-group-sm" role="group">
+              <button class="btn btn-outline-primary active" onclick="setFileCategory('all')">All</button>
+              <button class="btn btn-outline-primary" onclick="setFileCategory('img')">Images</button>
+              <button class="btn btn-outline-primary" onclick="setFileCategory('video')">Videos</button>
+              <button class="btn btn-outline-primary" onclick="setFileCategory('pdf')">PDF</button>
+              <button class="btn btn-outline-primary" onclick="setFileCategory('doc')">Docs</button>
+              <button class="btn btn-outline-primary" onclick="setFileCategory('archive')">Archives</button>
+              <button class="btn btn-outline-primary" onclick="setFileCategory('other')">Other</button>
+            </div>
+            <div class="btn-group btn-group-sm" role="group">
+              <button class="btn btn-outline-secondary active" id="gridViewBtn" onclick="toggleFileView('grid')"><i class="fas fa-th"></i></button>
+              <button class="btn btn-outline-secondary" id="listViewBtn" onclick="toggleFileView('list')"><i class="fas fa-list"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="currentFilterBar" class="current-filter-bar d-none">
+            <i class="fas fa-filter text-primary"></i>
+            <span id="filterBarText">Showing files from folder</span>
+            <button class="btn btn-sm btn-outline-secondary ms-auto" onclick="filterByFolder(null)"><i class="fas fa-times me-1"></i>Clear Filter</button>
+          </div>
+          <div class="row" id="filesGrid"></div>
+          <div class="table-responsive d-none" id="filesList">
+            <table class="table table-hover">
+              <thead>
+                <tr><th>File Name</th><th>Type</th><th>Size</th><th>Date</th><th>Folder</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="filesListBody"></tbody>
+            </table>
+          </div>
+          <div id="noFilesMsg" class="text-center py-4 text-muted d-none"><i class="fas fa-folder-open fa-3x mb-2"></i><p>No files found.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-inner">
+        <div class="footer-images">
+          <img src="static/img/first.png" alt="Partner 1" class="footer-img">
+          <img src="static/img/second.jpg" alt="Partner 2" class="footer-img">
+          <img src="static/img/third.png" alt="Partner 3" class="footer-img">
+          <img src="static/img/fourth.png" alt="Partner 4" class="footer-img">
+        </div>
+        <div class="footer-social">
+          <a href="https://facebook.com/share/1FnVMMFf92" target="_blank" rel="noopener noreferrer" title="Facebook"><i class="fab fa-facebook"></i></a>
+          <a href="mailto:oqaa.office@bsu.edu.ph" class="footer-email" title="Send Email"><i class="fas fa-envelope"></i> oqaa.office@bsu.edu.ph</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Preview Modal -->
+  <div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="previewFileName">Preview</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0 text-center" id="previewContent" style="min-height: 70vh;"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="previewDownloadBtn"><i class="fas fa-download me-2"></i>Download</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Folder Modal -->
+  <div class="modal fade" id="createFolderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-folder-plus me-2 text-primary"></i>Create New Folder</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Folder Name</label>
+            <input type="text" class="form-control" id="newFolderName" placeholder="e.g. HR Documents" maxlength="100" onkeydown="if(event.key==='Enter')createFolder()">
+            <div class="form-text">Use letters, numbers, and spaces. Max 100 characters.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="createFolder()">Create Folder</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Folder Modal -->
+  <div class="modal fade" id="editFolderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-edit me-2 text-primary"></i>Rename Folder</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Folder Name</label>
+            <input type="text" class="form-control" id="editFolderName" maxlength="100" onkeydown="if(event.key==='Enter')saveEditFolder()">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="saveEditFolder()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Folder Modal -->
+  <div class="modal fade" id="deleteFolderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Delete Folder</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete <strong id="deleteFolderName">this folder</strong>?</p>
+          <div class="alert alert-warning">
+            <i class="fas fa-info-circle me-2"></i>Files in this folder will be moved to <strong>Uncategorized</strong>.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" onclick="executeDeleteFolder()">Delete Folder</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mini Create Folder Modal (for inline in upload) -->
+  <div class="modal fade" id="miniCreateFolderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h6 class="modal-title"><i class="fas fa-folder-plus me-2 text-primary"></i>New Folder</h6>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control form-control-sm" id="miniFolderName" placeholder="Folder name" maxlength="100" onkeydown="if(event.key==='Enter')createFolderFromUpload()">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-sm btn-primary" onclick="createFolderFromUpload()">Create & Select</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="api.js"></script>
+  <script src="script.js"></script>
+  <script>
+    let filesData = [];
+    let foldersData = [];
+    let currentFileCategory = 'all';
+    let currentFileSearch = '';
+    let currentFileView = 'grid';
+    let currentPreviewFile = null;
+    let currentFolderFilter = null; // null = all, 'uncategorized', or folder id
+    let editingFolderId = null;
+    let deletingFolderId = null;
+
+    // ====================== FOLDERS ======================
+
+    async function loadFolders() {
+      try {
+        foldersData = await FoldersAPI.getAll();
+        renderFolders();
+        populateFolderDropdowns();
+      } catch (error) {
+        console.error('Failed to load folders:', error);
+        showToast('Error', 'Failed to load folders', 'danger');
+      }
+    }
+
+    function renderFolders() {
+      const container = document.getElementById('foldersGrid');
+      const noMsg = document.getElementById('noFoldersMsg');
+      if (!container) return;
+
+      let html = '';
+
+      // "All Files" card
+      const allFilesCount = filesData.length;
+      const isAllActive = currentFolderFilter === null;
+      html += `
+        <div class="col-6 col-md-4 col-lg-3 col-xl-2 mb-3">
+          <div class="folder-card ${isAllActive ? 'active' : ''}" onclick="filterByFolder(null)">
+            <div class="folder-icon-large" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);">
+              <i class="fas fa-th-large"></i>
+            </div>
+            <div class="folder-name" title="All Files">All Files</div>
+            <div class="folder-meta">${allFilesCount} Files</div>
+          </div>
+        </div>
+      `;
+
+      // "Uncategorized" card
+      const uncategorizedCount = filesData.filter(f => !f.folder_id).length;
+      const isUncategorizedActive = currentFolderFilter === 'uncategorized';
+      html += `
+        <div class="col-6 col-md-4 col-lg-3 col-xl-2 mb-3">
+          <div class="folder-card ${isUncategorizedActive ? 'active' : ''}" onclick="filterByFolder('uncategorized')">
+            <div class="folder-icon-large" style="background: linear-gradient(135deg, #858796 0%, #5a5c69 100%);">
+              <i class="fas fa-folder-open"></i>
+            </div>
+            <div class="folder-name" title="Uncategorized">Uncategorized</div>
+            <div class="folder-meta">${uncategorizedCount} Files</div>
+          </div>
+        </div>
+      `;
+
+      // User folders
+      if (foldersData.length === 0) {
+        noMsg.classList.remove('d-none');
+      } else {
+        noMsg.classList.add('d-none');
+        foldersData.forEach(folder => {
+          const isActive = currentFolderFilter === folder.id;
+          const isOwnFolder = folder.user_id === currentUserId;
+          const ownerBadge = (folder.owner_name)
+            ? `<span class="badge bg-secondary mt-1" style="font-size:0.65rem;"><i class="fas fa-user me-1"></i>${folder.owner_name}</span>`
+            : '';
+          // Permission check: only show edit/delete for owner or admin
+          const canManageFolder = folder.user_id === currentUserId || currentUserRole === 'admin';
+          const actionsHtml = canManageFolder ? `
+                <div class="folder-actions">
+                  <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); openEditFolderModal(${folder.id})" title="Rename">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); confirmDeleteFolder(${folder.id})" title="Delete">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+          ` : '';
+          html += `
+            <div class="col-6 col-md-4 col-lg-3 col-xl-2 mb-3">
+              <div class="folder-card ${isActive ? 'active' : ''}" onclick="filterByFolder(${folder.id})">
+                <div class="folder-icon-large">
+                  <i class="fas fa-folder"></i>
+                </div>
+                <div class="folder-name" title="${folder.folder_name}">${folder.folder_name}</div>
+                <div class="folder-meta">${folder.file_count} Files &bull; ${folder.created_at}</div>
+                ${ownerBadge}
+                ${actionsHtml}
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      container.innerHTML = html;
+    }
+
+    function filterByFolder(folderId) {
+      currentFolderFilter = folderId;
+      renderFolders();
+      updateFilterBar();
+      loadFiles();
+    }
+
+    function updateFilterBar() {
+      const bar = document.getElementById('currentFilterBar');
+      const label = document.getElementById('currentFolderLabel');
+      const text = document.getElementById('filterBarText');
+
+      if (currentFolderFilter === null) {
+        bar.classList.add('d-none');
+        label.style.display = 'none';
+        label.textContent = '';
+        return;
+      }
+
+      bar.classList.remove('d-none');
+      label.style.display = 'inline-block';
+
+      if (currentFolderFilter === 'uncategorized') {
+        label.textContent = 'Uncategorized';
+        text.innerHTML = 'Showing <strong>Uncategorized</strong> files';
+      } else {
+        const folder = foldersData.find(f => f.id === currentFolderFilter);
+        const name = folder ? folder.folder_name : 'Unknown';
+        label.textContent = name;
+        text.innerHTML = `Showing files from <strong>${name}</strong>`;
+      }
+    }
+
+    function populateFolderDropdowns() {
+      const uploadSelect = document.getElementById('uploadFolderSelect');
+      if (!uploadSelect) return;
+
+      // Preserve current selection
+      const currentVal = uploadSelect.value;
+      let html = '<option value="">Select Folder (Optional)</option>';
+      html += '<option value="uncategorized">Uncategorized</option>';
+      foldersData.forEach(folder => {
+        html += `<option value="${folder.id}">${folder.folder_name}</option>`;
+      });
+      uploadSelect.innerHTML = html;
+      // Restore selection if still valid
+      if (currentVal) {
+        let exists = false;
+        for (let opt of uploadSelect.options) {
+          if (opt.value === currentVal) { exists = true; break; }
+        }
+        if (exists) uploadSelect.value = currentVal;
+      }
+    }
+
+    async function createFolder() {
+      const input = document.getElementById('newFolderName');
+      const name = input.value.trim();
+      if (!name) {
+        showToast('Error', 'Folder name cannot be empty', 'danger');
+        return;
+      }
+      try {
+        const result = await FoldersAPI.create({ folder_name: name });
+        if (result.success) {
+          showToast('Success', 'Folder created successfully', 'success');
+          input.value = '';
+          bootstrap.Modal.getInstance(document.getElementById('createFolderModal')).hide();
+          await loadFolders();
+        }
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to create folder', 'danger');
+      }
+    }
+
+    async function createFolderFromUpload() {
+      const input = document.getElementById('miniFolderName');
+      const name = input.value.trim();
+      if (!name) {
+        showToast('Error', 'Folder name cannot be empty', 'danger');
+        return;
+      }
+      try {
+        const result = await FoldersAPI.create({ folder_name: name });
+        if (result.success) {
+          showToast('Success', 'Folder created and selected', 'success');
+          input.value = '';
+          bootstrap.Modal.getInstance(document.getElementById('miniCreateFolderModal')).hide();
+          await loadFolders();
+          // Select the new folder in dropdown
+          const uploadSelect = document.getElementById('uploadFolderSelect');
+          if (uploadSelect && result.folder) {
+            let exists = false;
+            for (let opt of uploadSelect.options) {
+              if (opt.value == result.folder.id) { exists = true; break; }
+            }
+            if (!exists) {
+              const option = document.createElement('option');
+              option.value = result.folder.id;
+              option.textContent = result.folder.folder_name;
+              uploadSelect.appendChild(option);
+            }
+            uploadSelect.value = result.folder.id;
+          }
+        }
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to create folder', 'danger');
+      }
+    }
+
+    function openEditFolderModal(folderId) {
+      const folder = foldersData.find(f => f.id === folderId);
+      if (!folder) return;
+      editingFolderId = folderId;
+      document.getElementById('editFolderName').value = folder.folder_name;
+      new bootstrap.Modal(document.getElementById('editFolderModal')).show();
+    }
+
+    async function saveEditFolder() {
+      const name = document.getElementById('editFolderName').value.trim();
+      if (!name) {
+        showToast('Error', 'Folder name cannot be empty', 'danger');
+        return;
+      }
+      try {
+        const result = await FoldersAPI.update(editingFolderId, { folder_name: name });
+        if (result.success) {
+          showToast('Success', 'Folder renamed successfully', 'success');
+          bootstrap.Modal.getInstance(document.getElementById('editFolderModal')).hide();
+          await loadFolders();
+          await loadFiles();
+        }
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to rename folder', 'danger');
+      }
+    }
+
+    function confirmDeleteFolder(folderId) {
+      const folder = foldersData.find(f => f.id === folderId);
+      if (!folder) return;
+      deletingFolderId = folderId;
+      document.getElementById('deleteFolderName').textContent = folder.folder_name;
+      new bootstrap.Modal(document.getElementById('deleteFolderModal')).show();
+    }
+
+    async function executeDeleteFolder() {
+      try {
+        const result = await FoldersAPI.delete(deletingFolderId);
+        if (result.success) {
+          showToast('Success', result.message, 'success');
+          bootstrap.Modal.getInstance(document.getElementById('deleteFolderModal')).hide();
+          if (currentFolderFilter === deletingFolderId) {
+            currentFolderFilter = null;
+          }
+          await loadFolders();
+          await loadFiles();
+          updateFilterBar();
+        }
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to delete folder', 'danger');
+      }
+    }
+
+    // ====================== FILES ======================
+
+    async function loadFiles() {
+      try {
+        const params = {};
+        if (currentFolderFilter !== null) {
+          params.folder_id = currentFolderFilter;
+        }
+        filesData = await FilesAPI.getAll(params);
+        renderFiles();
+        renderFolders(); // update counts
+      } catch (error) {
+        console.error('Failed to load files:', error);
+        showToast('Error', 'Failed to load files', 'danger');
+      }
+    }
+
+    function getCategoryLabel(type) {
+      if (type === 'img') return 'Image';
+      if (type === 'video') return 'Video';
+      if (type === 'pdf') return 'PDF';
+      if (type === 'doc' || type === 'xls' || type === 'ppt') return 'Document';
+      if (type === 'archive') return 'Archive';
+      return 'File';
+    }
+
+    function getFileIconClass(type) {
+      if (type === 'img') return 'img';
+      if (type === 'video') return 'video';
+      if (type === 'pdf') return 'pdf';
+      if (type === 'doc') return 'doc';
+      if (type === 'ppt') return 'ppt';
+      if (type === 'xls') return 'xls';
+      if (type === 'archive') return 'archive';
+      return 'other';
+    }
+
+    function getFilteredFiles() {
+      let filtered = filesData;
+      if (currentFileCategory !== 'all') {
+        if (currentFileCategory === 'other') {
+          filtered = filtered.filter(f => !['img','video','pdf','doc','xls','ppt','archive'].includes(f.type));
+        } else if (currentFileCategory === 'doc') {
+          filtered = filtered.filter(f => ['doc','xls','ppt'].includes(f.type));
+        } else {
+          filtered = filtered.filter(f => f.type === currentFileCategory);
+        }
+      }
+      if (currentFileSearch.trim()) {
+        const q = currentFileSearch.toLowerCase();
+        filtered = filtered.filter(f => f.name.toLowerCase().includes(q));
+      }
+      return filtered;
+    }
+
+    function renderFiles() {
+      const filtered = getFilteredFiles();
+      const grid = document.getElementById('filesGrid');
+      const list = document.getElementById('filesList');
+      const listBody = document.getElementById('filesListBody');
+      const noMsg = document.getElementById('noFilesMsg');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        listBody.innerHTML = '';
+        noMsg.classList.remove('d-none');
+        return;
+      }
+      noMsg.classList.add('d-none');
+
+      // Grid View
+      grid.innerHTML = filtered.map(file => {
+        const iconClass = file.type === 'img' ? 'image' : file.type === 'video' ? 'video' : file.type === 'pdf' ? 'file-pdf' : file.type === 'xls' ? 'file-excel' : file.type === 'ppt' ? 'file-powerpoint' : file.type === 'archive' ? 'file-archive' : 'file-alt';
+        const canDeleteFile = file.user_id === currentUserId || currentUserRole === 'admin';
+        const deleteBtn = canDeleteFile ? `<button class="btn btn-sm btn-outline-danger" onclick="event.stopPropagation(); deleteFile(${file.id})" title="Delete"><i class="fas fa-trash"></i></button>` : '';
+        return `
+        <div class="col-6 col-md-4 col-lg-3 mb-3 file-item" data-type="${file.type}" data-name="${file.name.toLowerCase()}">
+          <div class="file-card" onclick="previewFile(${file.id})">
+            <div class="file-icon ${getFileIconClass(file.type)}"><i class="fas fa-${iconClass}"></i></div>
+            <div class="file-name" title="${file.name}">${file.name}</div>
+            <div class="file-meta">${file.size} &bull; ${file.date} ${file.folder_name && file.folder_name !== 'Uncategorized' ? `<span class="badge bg-info ms-1">${file.folder_name}</span>` : ''}</div>
+            <div class="file-actions">
+              <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); downloadFile(${file.id})" title="Download"><i class="fas fa-download"></i></button>
+              ${deleteBtn}
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+
+      // List View
+      listBody.innerHTML = filtered.map(file => {
+        const iconClass = file.type === 'img' ? 'image' : file.type === 'video' ? 'video' : file.type === 'pdf' ? 'file-pdf' : file.type === 'xls' ? 'file-excel' : file.type === 'ppt' ? 'file-powerpoint' : file.type === 'archive' ? 'file-archive' : 'file-alt';
+        const canDeleteFile = file.user_id === currentUserId || currentUserRole === 'admin';
+        const deleteBtn = canDeleteFile ? `<button class="btn btn-sm btn-outline-danger" onclick="deleteFile(${file.id})" title="Delete"><i class="fas fa-trash"></i></button>` : '';
+        return `
+        <tr class="file-item" data-type="${file.type}" data-name="${file.name.toLowerCase()}">
+          <td><i class="fas fa-${iconClass} me-2 text-primary"></i> ${file.name}</td>
+          <td>${getCategoryLabel(file.type)}</td>
+          <td>${file.size}</td>
+          <td>${file.date}</td>
+          <td>${file.folder_name && file.folder_name !== 'Uncategorized' ? `<span class="badge bg-info">${file.folder_name}</span>` : '<span class="text-muted">—</span>'}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="downloadFile(${file.id})" title="Download"><i class="fas fa-download"></i></button>
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="previewFile(${file.id})" title="Preview"><i class="fas fa-eye"></i></button>
+            ${deleteBtn}
+          </td>
+        </tr>
+      `;
+      }).join('');
+    }
+
+    function setFileCategory(cat) {
+      currentFileCategory = cat;
+      document.querySelectorAll('.card-header .btn-group .btn-outline-primary').forEach(btn => {
+        btn.classList.remove('active');
+        const txt = btn.textContent.toLowerCase().trim();
+        if (cat === 'all' && txt === 'all') btn.classList.add('active');
+        else if (cat === 'img' && txt === 'images') btn.classList.add('active');
+        else if (cat === 'video' && txt === 'videos') btn.classList.add('active');
+        else if (cat === 'pdf' && txt === 'pdf') btn.classList.add('active');
+        else if (cat === 'doc' && txt === 'docs') btn.classList.add('active');
+        else if (cat === 'archive' && txt === 'archives') btn.classList.add('active');
+        else if (cat === 'other' && txt === 'other') btn.classList.add('active');
+      });
+      renderFiles();
+    }
+
+    function filterDashboardFiles() {
+      currentFileSearch = document.getElementById('fileSearch').value;
+      renderFiles();
+    }
+
+    function toggleFileView(view) {
+      currentFileView = view;
+      document.getElementById('filesGrid').classList.toggle('d-none', view !== 'grid');
+      document.getElementById('filesList').classList.toggle('d-none', view !== 'list');
+      document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
+      document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
+    }
+
+    function downloadFile(fileId) {
+      FilesAPI.download(fileId);
+      showToast('Download Started', 'Your file download has started.', 'info');
+    }
+
+    function previewFile(fileId) {
+      currentPreviewFile = filesData.find(f => f.id === fileId);
+      if (!currentPreviewFile) return;
+      document.getElementById('previewFileName').textContent = currentPreviewFile.name;
+      const content = document.getElementById('previewContent');
+      const ext = currentPreviewFile.name.split('.').pop().toLowerCase();
+      if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+        content.innerHTML = `<img src="/api/files/${fileId}/preview" style="max-width:100%; max-height:80vh; object-fit:contain;">`;
+      } else if (ext === 'pdf') {
+        content.innerHTML = `<iframe src="/api/files/${fileId}/preview" style="width:100%; height:80vh; border:none;"></iframe>`;
+      } else if (['mp4','mov','avi','mkv','webm'].includes(ext)) {
+        const mimeType = ext === 'mov' ? 'video/mp4' : `video/${ext}`;
+        content.innerHTML = `<video controls style="max-width:100%; max-height:80vh;"><source src="/api/files/${fileId}/preview" type="${mimeType}">Your browser does not support the video tag.</video>`;
+      } else {
+        content.innerHTML = `<div class="p-5"><i class="fas fa-file fa-5x text-muted mb-3"></i><h5>Preview not available</h5><p class="text-muted">Download to view this file.</p></div>`;
+      }
+      const dlBtn = document.getElementById('previewDownloadBtn');
+      dlBtn.onclick = () => { downloadFile(fileId); };
+      new bootstrap.Modal(document.getElementById('previewModal')).show();
+    }
+
+    async function deleteFile(fileId) {
+      if (!confirm('Are you sure you want to delete this file?')) return;
+      try {
+        await FilesAPI.delete(fileId);
+        filesData = filesData.filter(f => f.id !== fileId);
+        renderFiles();
+        // Refresh folders from database to ensure accurate counts after deletion
+        await loadFolders();
+        showToast('Deleted', 'File deleted successfully', 'success');
+      } catch (error) {
+        showToast('Error', 'Failed to delete file', 'danger');
+      }
+    }
+
+    // Upload handling
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = 'var(--primary-color)'; });
+    uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = '';
+      if (e.dataTransfer.files.length) handleUpload(e.dataTransfer.files);
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleUpload(e.target.files);
+    });
+
+    async function handleUpload(files) {
+      const folderId = document.getElementById('uploadFolderSelect').value;
+      // Frontend validation: reject unsupported file types before upload
+      const allowedExtensions = ['jpg','jpeg','png','gif','webp','mp4','mov','avi','mkv','webm','pdf','doc','docx','xls','xlsx','ppt','pptx','txt','zip','rar','7z'];
+
+      for (let file of files) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (!allowedExtensions.includes(ext)) {
+          showToast('Error', `File type .${ext} is not allowed: ${file.name}`, 'danger');
+          continue;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+        if (folderId) {
+          formData.append('folder_id', folderId);
+        }
+        try {
+          const result = await FilesAPI.upload(formData);
+          filesData.unshift(result);
+          renderFiles();
+          // Refresh folders from database to ensure accurate counts
+          await loadFolders();
+          showToast('Uploaded', `${file.name} uploaded successfully`, 'success');
+        } catch (err) {
+          showToast('Error', `Failed to upload ${file.name}${err.message ? ': ' + err.message : ''}`, 'danger');
+        }
+      }
+    }
+
+    function toggleUploadDropdown() {
+      const body = document.getElementById('uploadDropdownBody');
+      const icon = document.getElementById('uploadDropdownIcon');
+      if (body.style.display === 'none') {
+        body.style.display = 'block';
+        icon.style.transform = 'rotate(180deg)';
+      } else {
+        body.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+      }
+    }
+
+    let currentUserId = null;
+    let currentUserRole = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await loadCurrentUser();
+      if (user) {
+        currentUserId = user.id;
+        currentUserRole = user.role;
+      }
+      await loadFolders();
+      await loadFiles();
+    });
+  </script>
+</body>
+</html>

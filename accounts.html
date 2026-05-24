@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- FIX: Correct page title -->
+  <title>Accounts - OQAADMS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .filter-badge { font-size: 0.75rem; padding: 0.25rem 0.5rem; margin-left: 0.5rem; }
+    .report-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  </style>
+<base>
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-top-image d-none d-md-block">
+      <a href="https://facebook.com/share/1FnVMMFf92"><img src="static/img/top.png" alt="OQAADMS Logo" class="sidebar-logo-img"></a>
+    </div>
+    <div class="sidebar-bottom-image d-none d-md-block">
+      <a href="home.html"><img src="static/img/bottom.png" alt="OQAADMS Bottom" class="sidebar-bottom-img"></a>
+    </div>
+    <div class="sidebar-brand">
+      <h4><i class="fas fa-folder-open"></i><span>OQAADMS</span></h4>
+    </div>
+    <div class="sidebar-menu">
+      <ul class="nav flex-column">
+        <li class="nav-item"><a href="home.html" class="nav-link"><i class="fas fa-home"></i><span>Home</span></a></li>
+        <li class="nav-item"><a href="index.html" class="nav-link"><i class="fas fa-tachometer-alt"></i><span>Files</span></a></li>
+        <li class="nav-item"><a href="profile.html" class="nav-link"><i class="fas fa-user"></i><span>Profile</span></a></li>
+        <!-- FIX: Accounts link is now active and points to accounts.html -->
+        <li class="nav-item admin-only" style="display: none;"><a href="accounts.html" class="nav-link active"><i class="fas fa-users"></i><span>Accounts</span></a></li>
+        <!-- FIX: History link is NOT active on this page -->
+        <li class="nav-item admin-only" style="display: none;"><a href="history.html" class="nav-link"><i class="fas fa-history"></i><span>History</span></a></li>
+        <li class="nav-item"><a href="#" class="nav-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="main-content" id="mainContent">
+    <!-- Top Navbar -->
+    <nav class="top-navbar">
+      <button class="toggle-sidebar" id="toggleSidebar"><i class="fas fa-bars"></i></button>
+      <div class="navbar-right">
+        <button class="dark-mode-toggle" id="darkModeToggle" title="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+        <div class="dropdown">
+          <div class="user-dropdown" data-bs-toggle="dropdown">
+            <img src="https://ui-avatars.com/api/?name=User&background=4e73df&color=fff" alt="User" class="user-avatar">
+            <span class="user-name d-none d-lg-block">Loading...</span>
+            <i class="fas fa-chevron-down d-none d-lg-block" style="font-size: 0.7rem; color: #858796;"></i>
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>Profile</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="content-area">
+      <!-- FIX: Page header now reads Accounts -->
+      <div class="page-header">
+        <h2>Accounts</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="home.html">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Accounts</li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stats-card primary">
+            <div class="d-flex justify-content-between align-items-center">
+              <div><div class="stats-label">Total Accounts</div><div class="stats-value" id="statTotal">0</div></div>
+              <i class="fas fa-users stats-icon"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stats-card success">
+            <div class="d-flex justify-content-between align-items-center">
+              <div><div class="stats-label">Active Users</div><div class="stats-value" id="statActive">0</div></div>
+              <i class="fas fa-user-check stats-icon"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stats-card warning">
+            <div class="d-flex justify-content-between align-items-center">
+              <div><div class="stats-label">Pending</div><div class="stats-value" id="statPending">0</div></div>
+              <i class="fas fa-user-clock stats-icon"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+          <div class="stats-card info">
+            <div class="d-flex justify-content-between align-items-center">
+              <div><div class="stats-label">Administrators</div><div class="stats-value" id="statAdmins">0</div></div>
+              <i class="fas fa-user-shield stats-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Add Button -->
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h6><i class="fas fa-filter me-2"></i>Filter Users</h6>
+          <button class="btn btn-primary btn-sm" onclick="openAccountModal()">
+            <i class="fas fa-plus me-1"></i>Add Account
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="row align-items-end g-3">
+            <div class="col-md-4">
+              <label class="form-label">Search</label>
+              <input type="text" id="searchUsers" class="form-control form-control-sm" placeholder="Name or email..." oninput="renderUsers()">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Role</label>
+              <select class="form-select form-select-sm" id="filterRole" onchange="renderUsers()">
+                <option value="all">All Roles</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Status</label>
+              <select class="form-select form-select-sm" id="filterStatus" onchange="renderUsers()">
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-2 text-md-end">
+              <button class="btn btn-outline-secondary btn-sm" onclick="clearUserFilters()" title="Clear filters">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h6><i class="fas fa-users me-2"></i>User Accounts</h6>
+          <span class="badge bg-secondary" id="totalUsersBadge">0 users</span>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover" id="usersTable">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                  <th>Last Login</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div id="noUsersMsg" class="text-center py-4 text-muted d-none">
+            <i class="fas fa-users fa-3x mb-2"></i>
+            <p>No users found.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-inner">
+        <div class="footer-images">
+          <img src="static/img/first.png" alt="Partner 1" class="footer-img">
+          <img src="static/img/second.jpg" alt="Partner 2" class="footer-img">
+          <img src="static/img/third.png" alt="Partner 3" class="footer-img">
+          <img src="static/img/fourth.png" alt="Partner 4" class="footer-img">
+        </div>
+        <div class="footer-social">
+          <a href="https://facebook.com/share/1FnVMMFf92" target="_blank" rel="noopener noreferrer" title="Facebook"><i class="fab fa-facebook"></i></a>
+          <a href="mailto:oqaa.office@bsu.edu.ph" class="footer-email" title="Send Email"><i class="fas fa-envelope"></i> oqaa.office@bsu.edu.ph</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Add / Edit Account Modal -->
+  <div class="modal fade" id="accountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="accountModalTitle"><i class="fas fa-user-plus me-2"></i>Add Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="accountForm">
+            <input type="hidden" id="accountId">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">First Name *</label>
+                <input type="text" class="form-control" id="accFirstName" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Last Name *</label>
+                <input type="text" class="form-control" id="accLastName" required>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Email *</label>
+                <input type="email" class="form-control" id="accEmail" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Phone</label>
+                <input type="tel" class="form-control" id="accPhone">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Department</label>
+                <input type="text" class="form-control" id="accDepartment">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Role *</label>
+                <select class="form-select" id="accRole" required>
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="accStatus">
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3" id="passwordFieldGroup">
+                <label class="form-label">Password <small class="text-muted">(default: password123)</small></label>
+                <input type="password" class="form-control" id="accPassword" placeholder="Leave blank for default">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitAccountForm()"><i class="fas fa-save me-2"></i>Save Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Delete Account</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete <strong id="deleteAccountName">this user</strong>?</p>
+          <div class="alert alert-warning">
+            <i class="fas fa-info-circle me-2"></i>This action cannot be undone.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" onclick="executeDeleteAccount()">Delete Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="api.js"></script>
+  <script src="script.js"></script>
+  <script>
+    let usersData = [];
+    let currentEditId = null;
+    let currentDeleteId = null;
+
+    // Load dashboard stats from /api/accounts/stats
+    async function loadAccountStats() {
+      try {
+        const stats = await apiCall('/accounts/stats');
+        document.getElementById('statTotal').textContent = stats.total_accounts || 0;
+        document.getElementById('statActive').textContent = stats.active_users || 0;
+        document.getElementById('statPending').textContent = stats.pending_accounts || 0;
+        document.getElementById('statAdmins').textContent = stats.administrators || 0;
+      } catch (error) {
+        console.error('Failed to load account stats:', error);
+      }
+    }
+
+    // Load all users via AccountsAPI
+    async function loadUsers() {
+      try {
+        usersData = await AccountsAPI.getAll();
+        renderUsers();
+      } catch (error) {
+        console.error('Failed to load users:', error);
+        showToast('Error', 'Failed to load user accounts', 'danger');
+      }
+    }
+
+    // Render filtered user table
+    function renderUsers() {
+      const tbody = document.querySelector('#usersTable tbody');
+      const noMsg = document.getElementById('noUsersMsg');
+      const search = document.getElementById('searchUsers').value.toLowerCase();
+      const roleFilter = document.getElementById('filterRole').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+
+      let filtered = usersData.filter(u => {
+        const matchesSearch = !search ||
+          (u.name && u.name.toLowerCase().includes(search)) ||
+          (u.email && u.email.toLowerCase().includes(search));
+        const matchesRole = roleFilter === 'all' || u.role === roleFilter;
+        const matchesStatus = statusFilter === 'all' || u.status === statusFilter;
+        return matchesSearch && matchesRole && matchesStatus;
+      });
+
+      document.getElementById('totalUsersBadge').textContent = `${filtered.length} user${filtered.length !== 1 ? 's' : ''}`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        noMsg.classList.remove('d-none');
+        return;
+      }
+      noMsg.classList.add('d-none');
+
+      const currentUser = JSON.parse(safeStorage.getItem('currentUser') || '{}');
+
+      tbody.innerHTML = filtered.map(user => {
+        const statusClass = user.status === 'active' ? 'bg-success' :
+                          user.status === 'pending' ? 'bg-warning' : 'bg-secondary';
+        const isSelf = user.id === currentUser.id;
+
+        return `
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <img src="${user.avatar || 'https://ui-avatars.com/api/?name=User&background=4e73df&color=fff'}" class="rounded-circle me-2" width="32" height="32">
+                <div>
+                  <div class="fw-bold">${user.name}</div>
+                  <small class="text-muted">${user.id_number || ''}</small>
+                </div>
+              </div>
+            </td>
+            <td>${user.email}</td>
+            <td><span class="badge bg-${user.role === 'admin' ? 'danger' : 'info'} text-uppercase">${user.role}</span></td>
+            <td>${user.department || '-'}</td>
+            <td><span class="badge ${statusClass} text-capitalize">${user.status}</span></td>
+            <td>${user.last_login || 'Never'}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-1" onclick="editAccount(${user.id})" title="Edit"><i class="fas fa-edit"></i></button>
+              ${user.status === 'active'
+                ? `<button class="btn btn-sm btn-outline-warning me-1" onclick="toggleStatus(${user.id}, 'deactivate')" title="Deactivate"><i class="fas fa-ban"></i></button>`
+                : `<button class="btn btn-sm btn-outline-success me-1" onclick="toggleStatus(${user.id}, 'activate')" title="Activate"><i class="fas fa-check"></i></button>`
+              }
+              <button class="btn btn-sm btn-outline-danger ${isSelf ? 'disabled' : ''}" onclick="${isSelf ? '' : `confirmDeleteAccount(${user.id}, '${user.name.replace(/'/g, "\\'")}')`}" title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function clearUserFilters() {
+      document.getElementById('searchUsers').value = '';
+      document.getElementById('filterRole').value = 'all';
+      document.getElementById('filterStatus').value = 'all';
+      renderUsers();
+    }
+
+    // Open modal for adding a new account
+    function openAccountModal() {
+      currentEditId = null;
+      document.getElementById('accountModalTitle').innerHTML = '<i class="fas fa-user-plus me-2"></i>Add Account';
+      document.getElementById('accountForm').reset();
+      document.getElementById('accountId').value = '';
+      document.getElementById('passwordFieldGroup').style.display = 'block';
+      new bootstrap.Modal(document.getElementById('accountModal')).show();
+    }
+
+    // Open modal for editing an existing account
+    function editAccount(userId) {
+      const user = usersData.find(u => u.id === userId);
+      if (!user) return;
+      currentEditId = userId;
+      document.getElementById('accountModalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Edit Account';
+      document.getElementById('accountId').value = userId;
+      document.getElementById('accFirstName').value = user.first_name || '';
+      document.getElementById('accLastName').value = user.last_name || '';
+      document.getElementById('accEmail').value = user.email || '';
+      document.getElementById('accPhone').value = user.phone || '';
+      document.getElementById('accDepartment').value = user.department || '';
+      document.getElementById('accRole').value = user.role || 'user';
+      document.getElementById('accStatus').value = user.status || 'active';
+      document.getElementById('passwordFieldGroup').style.display = 'none';
+      new bootstrap.Modal(document.getElementById('accountModal')).show();
+    }
+
+    // Submit Add or Edit form
+    async function submitAccountForm() {
+      const firstName = document.getElementById('accFirstName').value.trim();
+      const lastName = document.getElementById('accLastName').value.trim();
+      const email = document.getElementById('accEmail').value.trim();
+      if (!firstName || !lastName || !email) {
+        showToast('Error', 'First name, last name, and email are required', 'danger');
+        return;
+      }
+
+      const payload = {
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        phone: document.getElementById('accPhone').value.trim(),
+        department: document.getElementById('accDepartment').value.trim(),
+        role: document.getElementById('accRole').value,
+        status: document.getElementById('accStatus').value
+      };
+
+      try {
+        if (currentEditId) {
+          await AccountsAPI.update(currentEditId, payload);
+          showToast('Success', 'Account updated successfully', 'success');
+        } else {
+          payload.password = document.getElementById('accPassword').value.trim() || 'password123';
+          payload.user_type = payload.role;
+          await AccountsAPI.create(payload);
+          showToast('Success', 'Account created successfully', 'success');
+        }
+        bootstrap.Modal.getInstance(document.getElementById('accountModal')).hide();
+        await loadUsers();
+        await loadAccountStats();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to save account', 'danger');
+      }
+    }
+
+    // Activate or deactivate a user
+    async function toggleStatus(userId, action) {
+      try {
+        if (action === 'activate') {
+          await apiCall(`/accounts/${userId}/activate`, 'POST');
+          showToast('Success', 'Account activated', 'success');
+        } else {
+          await apiCall(`/accounts/${userId}/deactivate`, 'POST');
+          showToast('Success', 'Account deactivated', 'success');
+        }
+        await loadUsers();
+        await loadAccountStats();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to update status', 'danger');
+      }
+    }
+
+    // Show delete confirmation modal
+    function confirmDeleteAccount(userId, userName) {
+      currentDeleteId = userId;
+      document.getElementById('deleteAccountName').textContent = userName;
+      new bootstrap.Modal(document.getElementById('deleteAccountModal')).show();
+    }
+
+    // Execute account deletion
+    async function executeDeleteAccount() {
+      try {
+        await AccountsAPI.delete(currentDeleteId);
+        showToast('Success', 'Account deleted successfully', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('deleteAccountModal')).hide();
+        await loadUsers();
+        await loadAccountStats();
+      } catch (error) {
+        showToast('Error', error.message || 'Failed to delete account', 'danger');
+      }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        await loadCurrentUser();
+        await loadAccountStats();
+        await loadUsers();
+      } catch (error) {
+        console.error('Failed to initialize accounts page:', error);
+      }
+    });
+  </script>
+</body>
+</html>
